@@ -1,0 +1,55 @@
+services:
+  # Development environment with hot reload
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: gig-driver-dev
+    ports:
+      - "8081:8081"      # Metro bundler
+      - "19000:19000"    # Expo dev server
+      - "19001:19001"    # Fast refresh
+    environment:
+      - EXPO_PUBLIC_SUPABASE_URL=${EXPO_PUBLIC_SUPABASE_URL}
+      - EXPO_PUBLIC_SUPABASE_ANON_KEY=${EXPO_PUBLIC_SUPABASE_ANON_KEY}
+      - EXPO_PUBLIC_MAPS_API_KEY=${EXPO_PUBLIC_MAPS_API_KEY}
+      - EXPO_PUBLIC_CRASH_REPORTING_KEY=${EXPO_PUBLIC_CRASH_REPORTING_KEY}
+    volumes:
+      - ./src:/app/src
+      - ./app:/app/app
+      - ./assets:/app/assets
+      - /app/node_modules
+    develop:
+      watch:
+        - path: ./src
+          action: sync
+        - path: ./app
+          action: sync
+        - path: ./assets
+          action: sync
+        - path: ./package.json
+          action: rebuild
+
+  # Production environment (static web build)
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: gig-driver-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - EXPO_PUBLIC_SUPABASE_URL=${EXPO_PUBLIC_SUPABASE_URL}
+      - EXPO_PUBLIC_SUPABASE_ANON_KEY=${EXPO_PUBLIC_SUPABASE_ANON_KEY}
+      - EXPO_PUBLIC_MAPS_API_KEY=${EXPO_PUBLIC_MAPS_API_KEY}
+      - EXPO_PUBLIC_CRASH_REPORTING_KEY=${EXPO_PUBLIC_CRASH_REPORTING_KEY}
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    profiles:
+      - prod

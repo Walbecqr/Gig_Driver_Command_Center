@@ -1,16 +1,21 @@
 import { useEffect } from 'react';
 import { initLocalDatabase } from '@/db';
 import { supabaseClient } from '@/services/supabase/client';
+import { useAppStore } from '@/state/appStore';
+import { captureException } from '@/services/crash';
 
 export function useInitApp() {
-  useEffect(() => {
-    initLocalDatabase().catch((error) => {
-      console.error('[useInitApp] failed to initialize local db', error);
-    });
+  const setDbReady = useAppStore((s) => s.setDbReady);
 
-    // bare initialization for Supabase or auth existing session checks
+  useEffect(() => {
+    initLocalDatabase()
+      .then(() => setDbReady(true))
+      .catch((error) => {
+        captureException(error, { context: 'useInitApp/initLocalDatabase' });
+      });
+
     if (supabaseClient) {
-      // no-op in shell
+      supabaseClient.auth.getSession().catch(() => null);
     }
-  }, []);
+  }, [setDbReady]);
 }

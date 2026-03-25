@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node_modules/.bin/tsc --noEmit)"
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(/c/Users/Walbe/AppData/Local/claude-cli-nodejs/node --version)",
+      "Bash(export PATH=/c/Users/Walbe/AppData/Roaming/npm:$PATH)",
+      "Bash(powershell.exe -Command \"node --version; npm --version; npx --version\")",
+      "Bash(echo $PATH)",
+      "Bash(cmd.exe /c \"set | findstr NVM\")",
+      "Bash(cmd.exe /c \"node --version && npm --version\")",
+      "Bash(NODE_EXE=\"/c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/node.exe\" ls /c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/)",
+      "Bash(NODE_EXE=\"/c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/node.exe\" ls /c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/bin/)"
     ]
   }
 }

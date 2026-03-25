@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+.expo
+.env.local
+dist
+build
+.git
+.gitignore
+.editorconfig
+README.md
+docs
+tests
+.claude
+.eslintrc.js
+prettier.config.js
+babel.config.js

@@ -24,7 +24,6 @@
     "@supabase/supabase-js": "^2.33.0",
     "@tanstack/react-query": "^5.4.0",
     "expo": "~50.0.21",
-    "expo-app-loading": "~2.2.0",
     "expo-constants": "~14.2.1",
     "expo-device": "~6.0.2",
     "expo-linking": "~5.0.2",
@@ -63,9 +62,7 @@
     "@types/react-test-renderer": "^18.0.2",
     "react-test-renderer": "18.2.0"
   },
-  "private": true,
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "node": ">=18.0.0"
   }
 }
