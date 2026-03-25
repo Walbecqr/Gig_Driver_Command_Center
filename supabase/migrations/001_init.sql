@@ -1,7 +1,7 @@
 -- Supabase initial SQL schema for core entities.
 -- Run using `supabase db push` or SQL editor (if local setup available).
 
-create table if not exists users (
+create table users (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   email text not null unique,
@@ -9,7 +9,7 @@ create table if not exists users (
   created_at timestamptz not null default now()
 );
 
-create table if not exists delivery_platform_accounts (
+create table delivery_platform_accounts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) on delete cascade,
   platform text not null,
@@ -18,7 +18,7 @@ create table if not exists delivery_platform_accounts (
   created_at timestamptz not null default now()
 );
 
-create table if not exists shifts (
+create table shifts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) on delete cascade,
   platform_account_id uuid references delivery_platform_accounts(id),
