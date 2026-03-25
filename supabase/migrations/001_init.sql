@@ -2,7 +2,7 @@
 -- Run using `supabase db push` or SQL editor (if local setup available).
 
 create table if not exists users (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   name text not null,
   email text not null unique,
   preferred_currency text default 'USD',
@@ -10,7 +10,7 @@ create table if not exists users (
 );
 
 create table if not exists delivery_platform_accounts (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) on delete cascade,
   platform text not null,
   account_name text,
@@ -19,7 +19,7 @@ create table if not exists delivery_platform_accounts (
 );
 
 create table if not exists shifts (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) on delete cascade,
   platform_account_id uuid references delivery_platform_accounts(id),
   start_time timestamptz not null,
