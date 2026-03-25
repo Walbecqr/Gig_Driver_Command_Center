@@ -11,7 +11,11 @@
       "Bash(NODE_EXE=\"/c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/node.exe\" ls /c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/)",
       "Bash(NODE_EXE=\"/c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/node.exe\" ls /c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/bin/)",
       "Bash(ls c:/Users/Walbe/Gig_Driver_Command_Center/docker-compose*)",
-      "Bash(MINI_PNG=\"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQAABjE+ibYAAAAASUVORK5CYII=\" ASSETS_DIR=\"c:/Users/Walbe/Gig_Driver_Command_Center/assets\" __NEW_LINE_a4c2596265f5a2cc__ echo \"$MINI_PNG\")"
+      "Bash(MINI_PNG=\"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQAABjE+ibYAAAAASUVORK5CYII=\" ASSETS_DIR=\"c:/Users/Walbe/Gig_Driver_Command_Center/assets\" __NEW_LINE_a4c2596265f5a2cc__ echo \"$MINI_PNG\")",
+      "Bash(npm --version)",
+      "Bash(cmd.exe /c \"if exist C:\\\\Users\\\\Walbe\\\\Gig_Driver_Command_Center\\\\.env \\(echo .env EXISTS\\) else \\(echo .env MISSING\\)\")",
+      "Bash(cmd.exe /c \"node --version\")",
+      "Bash(echo \"exit: $?\")"
     ]
   }
 }
