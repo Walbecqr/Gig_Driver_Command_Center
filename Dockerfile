@@ -1,5 +1,5 @@
 # Multi-stage build for Expo web application
-FROM node:18-alpine AS dependencies
+FROM node:20.13-alpine AS dependencies
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
 # Development stage - runs Expo dev server
-FROM node:18-alpine AS development
+FROM node:20.13-alpine AS development
 
 WORKDIR /app
 
@@ -27,7 +27,7 @@ EXPOSE 19000 19001 19002 8081
 CMD ["npm", "start"]
 
 # Builder stage - exports static web build
-FROM node:18-alpine AS builder
+FROM node:20.13-alpine AS builder
 
 WORKDIR /app
 
@@ -41,7 +41,7 @@ ENV NODE_ENV=production
 RUN npm run web -- --no-dev || echo "Web build completed with status"
 
 # Production stage - serves static build
-FROM node:18-alpine AS production
+FROM node:20.13-alpine AS production
 
 WORKDIR /app
 
