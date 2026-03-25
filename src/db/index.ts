@@ -1,15 +1,21 @@
-import * as SQLite from 'expo-sqlite';
-import { executeSql } from './sqlite';
+/**
+ * Local SQLite database — offline-first source of truth for in-progress
+ * shift and field-operations data.
+ *
+ * Uses expo-sqlite v13 async API (Expo SDK 50).
+ * Migration versioning is handled via the `migrations` table.
+ */
 
-const DB_NAME = 'gigdcs.db';
+import { getDb } from './sqlite';
 
-export type Migration = { version: string; sql: string };
-
-const migrations: Migration[] = [
+const MIGRATIONS: Array<{ version: string; sql: string }> = [
   {
     version: '001',
     sql: `
-      CREATE TABLE IF NOT EXISTS migrations (version TEXT PRIMARY KEY, applied_at TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS migrations (
+        version TEXT PRIMARY KEY,
+        applied_at TEXT NOT NULL
+      );
 
       CREATE TABLE IF NOT EXISTS shifts (
         id TEXT PRIMARY KEY,
@@ -106,27 +112,32 @@ const migrations: Migration[] = [
         created_at TEXT NOT NULL,
         processed_at TEXT
       );
-    `
-  }
+    `,
+  },
 ];
 
-export const db = SQLite.openDatabase(DB_NAME);
-
 export async function initLocalDatabase(): Promise<void> {
-  try {
-    await executeSql(db, 'PRAGMA journal_mode=WAL;');
-    await executeSql(db, 'PRAGMA foreign_keys=ON;');
+  const db = await getDb();
 
-    const migration = migrations[0];
+  await db.runAsync('PRAGMA journal_mode = WAL;');
+  await db.runAsync('PRAGMA foreign_keys = ON;');
 
-    await executeSql(db, migration.sql);
-    await executeSql(
-      db,
-      `INSERT OR IGNORE INTO migrations (version, applied_at) VALUES (?, datetime('now'));`,
+  for (const migration of MIGRATIONS) {
+    const existing = await db.getAllAsync<{ version: string }>(
+      'SELECT version FROM migrations WHERE version = ?;',
       [migration.version],
     );
-  } catch (error) {
-    console.error('[db] initialization error', error);
-    throw error;
+    if (existing.length > 0) continue;
+
+    const statements = migration.sql.split(';').filter((s) => s.trim());
+    for (const statement of statements) {
+      await db.runAsync(statement + ';');
+    }
+    await db.runAsync(`INSERT INTO migrations (version, applied_at) VALUES (?, datetime('now'));`, [
+      migration.version,
+    ]);
   }
 }
+
+// Re-export helpers so repositories import from a single place
+export { execSql, runSql, querySql, queryOneSql, getDb } from './sqlite';

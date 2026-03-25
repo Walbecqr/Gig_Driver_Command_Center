@@ -9,7 +9,8 @@
       "Bash(cmd.exe /c \"set | findstr NVM\")",
       "Bash(cmd.exe /c \"node --version && npm --version\")",
       "Bash(NODE_EXE=\"/c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/node.exe\" ls /c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/)",
-      "Bash(NODE_EXE=\"/c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/node.exe\" ls /c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/bin/)"
+      "Bash(NODE_EXE=\"/c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/node.exe\" ls /c/Users/Walbe/.vscode/cli/servers/Stable-1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server/bin/)",
+      "Bash(ls c:/Users/Walbe/Gig_Driver_Command_Center/docker-compose*)"
     ]
   }
 }

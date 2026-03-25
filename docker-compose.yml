@@ -1,5 +1,9 @@
 services:
-  # Development environment with hot reload
+
+  # ── Dev web server (Expo web / Metro) ────────────────────────────────────────
+  # Usage:  docker compose up app-dev
+  # Opens:  http://localhost:19006  (Expo web)
+  #         http://localhost:8081   (Metro bundler / raw bundle endpoint)
   app-dev:
     build:
       context: .
@@ -7,31 +11,60 @@ services:
       target: development
     container_name: gig-driver-dev
     ports:
-      - "8081:8081"      # Metro bundler
-      - "19000:19000"    # Expo dev server
-      - "19001:19001"    # Fast refresh
+      - "8081:8081"       # Metro bundler
+      - "19000:19000"     # Expo classic dev server
+      - "19001:19001"     # Fast Refresh websocket
+      - "19006:19006"     # Expo web (browser)
+    env_file:
+      - .env              # picks up EXPO_PUBLIC_* values from your local .env
     environment:
-      - EXPO_PUBLIC_SUPABASE_URL=${EXPO_PUBLIC_SUPABASE_URL}
-      - EXPO_PUBLIC_SUPABASE_ANON_KEY=${EXPO_PUBLIC_SUPABASE_ANON_KEY}
-      - EXPO_PUBLIC_MAPS_API_KEY=${EXPO_PUBLIC_MAPS_API_KEY}
-      - EXPO_PUBLIC_CRASH_REPORTING_KEY=${EXPO_PUBLIC_CRASH_REPORTING_KEY}
+      - EXPO_NO_REDIRECT_PAGE=1
+      # CI=1 is intentionally absent here — it disables Metro hot-reload
     volumes:
       - ./src:/app/src
       - ./app:/app/app
       - ./assets:/app/assets
-      - /app/node_modules
+      - ./docs:/app/docs
+      # Named volume keeps node_modules inside the container
+      # so Windows host filesystem quirks don't break native modules
+      - node_modules:/app/node_modules
     develop:
       watch:
         - path: ./src
           action: sync
+          target: /app/src
         - path: ./app
           action: sync
+          target: /app/app
         - path: ./assets
           action: sync
-        - path: ./package.json
+          target: /app/assets
+        - path: package.json
           action: rebuild
 
-  # Production environment (static web build)
+  # ── One-off shell for npm / lint / typecheck / test ──────────────────────────
+  # Usage:  docker compose run --rm shell
+  # Then:   npm run typecheck  |  npm run lint  |  npm run test
+  shell:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: gig-driver-shell
+    entrypoint: sh
+    stdin_open: true
+    tty: true
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+      - ./app:/app/app
+      - ./assets:/app/assets
+      - node_modules:/app/node_modules
+
+  # ── Production static web build ───────────────────────────────────────────────
+  # Usage:  docker compose --profile prod up app-prod
+  # Opens:  http://localhost:3000
   app-prod:
     build:
       context: .
@@ -40,16 +73,16 @@ services:
     container_name: gig-driver-prod
     ports:
       - "3000:3000"
-    environment:
-      - EXPO_PUBLIC_SUPABASE_URL=${EXPO_PUBLIC_SUPABASE_URL}
-      - EXPO_PUBLIC_SUPABASE_ANON_KEY=${EXPO_PUBLIC_SUPABASE_ANON_KEY}
-      - EXPO_PUBLIC_MAPS_API_KEY=${EXPO_PUBLIC_MAPS_API_KEY}
-      - EXPO_PUBLIC_CRASH_REPORTING_KEY=${EXPO_PUBLIC_CRASH_REPORTING_KEY}
+    env_file:
+      - .env
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
       interval: 30s
       timeout: 3s
       retries: 3
-      start_period: 5s
+      start_period: 10s
     profiles:
       - prod
+
+volumes:
+  node_modules:

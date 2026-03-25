@@ -1,62 +1,62 @@
-# Multi-stage build for Expo web application
-FROM node:20.13-alpine AS dependencies
+# Multi-stage build for Expo / React Native web application
+# Base image is node:24-alpine (matches the locally pulled image)
+
+# ── Stage 1: install dependencies ────────────────────────────────────────────
+FROM node:24-alpine AS dependencies
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 
-# Install dependencies with legacy peer deps support
+# --legacy-peer-deps handles the mixed react-navigation / expo-router peer chain
 RUN npm install --legacy-peer-deps
 
-# Development stage - runs Expo dev server
-FROM node:20.13-alpine AS development
+# ── Stage 2: development server ───────────────────────────────────────────────
+FROM node:24-alpine AS development
 
 WORKDIR /app
 
-# Copy dependencies from first stage
+# Re-use installed modules from stage 1
 COPY --from=dependencies /app/node_modules ./node_modules
 
-# Copy application code
+# Copy source (docker-compose volume-mounts override this at runtime for HMR)
 COPY . .
 
-# Expose Expo dev server port
-EXPOSE 19000 19001 19002 8081
+# Metro bundler (8081), Expo web (19006), legacy Expo ports
+EXPOSE 8081 19000 19001 19002 19006
 
-# Start Expo in development mode
-CMD ["npm", "start"]
+# Non-interactive Expo web server.
+# --web          → starts the Webpack/Metro web server (browser-accessible)
+# --host lan     → binds to 0.0.0.0 so the host machine can reach it
+# EXPO_NO_REDIRECT_PAGE skips the "open in browser" redirect page
+ENV EXPO_NO_REDIRECT_PAGE=1
+CMD ["npx", "expo", "start", "--web", "--host", "lan"]
 
-# Builder stage - exports static web build
-FROM node:20.13-alpine AS builder
+# ── Stage 3: static web builder ───────────────────────────────────────────────
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
-# Set environment to production
 ENV NODE_ENV=production
 
-# Build web bundle (static export)
-RUN npm run web -- --no-dev || echo "Web build completed with status"
+# Export a static web bundle to /app/dist
+RUN npx expo export --platform web --output-dir dist
 
-# Production stage - serves static build
-FROM node:20.13-alpine AS production
+# ── Stage 4: production static server ─────────────────────────────────────────
+FROM node:24-alpine AS production
 
 WORKDIR /app
 
-# Install serve for static file serving
 RUN npm install -g serve
 
-# Copy built artifacts from builder
-COPY --from=builder /app/.expo/web ./dist
+COPY --from=builder /app/dist ./dist
 
-# Expose port
 EXPOSE 3000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
 
-# Start static server
 CMD ["serve", "-s", "dist", "-l", "3000"]
