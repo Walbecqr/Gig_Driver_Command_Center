@@ -6,7 +6,7 @@
  * Migration versioning is handled via the `migrations` table.
  */
 
-import { getDb } from './sqlite';
+import { execSql, runSql, querySql } from './sqlite';
 
 const MIGRATIONS: Array<{ version: string; sql: string }> = [
   {
@@ -117,13 +117,11 @@ const MIGRATIONS: Array<{ version: string; sql: string }> = [
 ];
 
 export async function initLocalDatabase(): Promise<void> {
-  const db = await getDb();
-
-  await db.runAsync('PRAGMA journal_mode = WAL;');
-  await db.runAsync('PRAGMA foreign_keys = ON;');
+  await execSql('PRAGMA journal_mode = WAL;');
+  await execSql('PRAGMA foreign_keys = ON;');
 
   for (const migration of MIGRATIONS) {
-    const existing = await db.getAllAsync<{ version: string }>(
+    const existing = await querySql<{ version: string }>(
       'SELECT version FROM migrations WHERE version = ?;',
       [migration.version],
     );
@@ -131,9 +129,9 @@ export async function initLocalDatabase(): Promise<void> {
 
     const statements = migration.sql.split(';').filter((s) => s.trim());
     for (const statement of statements) {
-      await db.runAsync(statement + ';');
+      await execSql(statement + ';');
     }
-    await db.runAsync(`INSERT INTO migrations (version, applied_at) VALUES (?, datetime('now'));`, [
+    await runSql(`INSERT INTO migrations (version, applied_at) VALUES (?, datetime('now'));`, [
       migration.version,
     ]);
   }

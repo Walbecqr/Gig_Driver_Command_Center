@@ -15,7 +15,13 @@
       "Bash(npm --version)",
       "Bash(cmd.exe /c \"if exist C:\\\\Users\\\\Walbe\\\\Gig_Driver_Command_Center\\\\.env \\(echo .env EXISTS\\) else \\(echo .env MISSING\\)\")",
       "Bash(cmd.exe /c \"node --version\")",
-      "Bash(echo \"exit: $?\")"
+      "Bash(echo \"exit: $?\")",
+      "Bash(npx tsc:*)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(npx eslint:*)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(npx vitest:*)",
+      "Bash(grep -r Link node_modules/expo-router/*.d.ts)"
     ]
   }
 }
