@@ -5,7 +5,7 @@ export const UserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
   preferred_currency: z.string().optional(),
-  created_at: z.string()
+  created_at: z.string(),
 });
 
 export const ShiftSchema = z.object({
@@ -16,7 +16,7 @@ export const ShiftSchema = z.object({
   end_time: z.string().nullable(),
   starting_mileage: z.number(),
   ending_mileage: z.number().nullable(),
-  status: z.enum(['active', 'paused', 'completed'])
+  status: z.enum(['active', 'paused', 'completed']),
 });
 
 // more Supabase schemas are added as needed

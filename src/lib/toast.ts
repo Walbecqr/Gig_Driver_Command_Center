@@ -24,12 +24,8 @@ function _showToast(options: ToastOptions): void {
 }
 
 export const toast = {
-  info: (title: string, message?: string) =>
-    _showToast({ title, message, level: 'info' }),
-  success: (title: string, message?: string) =>
-    _showToast({ title, message, level: 'success' }),
-  warning: (title: string, message?: string) =>
-    _showToast({ title, message, level: 'warning' }),
-  error: (title: string, message?: string) =>
-    _showToast({ title, message, level: 'error' }),
+  info: (title: string, message?: string) => _showToast({ title, message, level: 'info' }),
+  success: (title: string, message?: string) => _showToast({ title, message, level: 'success' }),
+  warning: (title: string, message?: string) => _showToast({ title, message, level: 'warning' }),
+  error: (title: string, message?: string) => _showToast({ title, message, level: 'error' }),
 };

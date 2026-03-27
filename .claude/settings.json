@@ -1,8 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(find c:UsersWalbe.vscodeextensions -name *azure* -o -name *windows-ai*)"
-    ],
+    "allow": ["Bash(find c:UsersWalbe.vscodeextensions -name *azure* -o -name *windows-ai*)"],
     "additionalDirectories": [
       "c:\\Users\\Walbe\\.vscode\\extensions\\github.copilot-chat-0.41.1\\node_modules\\@github\\copilot\\sdk\\definitions"
     ]

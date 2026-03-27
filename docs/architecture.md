@@ -13,7 +13,7 @@
 ## Core layers
 
 1. Presentation (app/ routes + src/components)
-2. Domain features (src/features/*)
+2. Domain features (src/features/\*)
 3. State + hooks (src/state, src/hooks)
 4. Persistent local DB (src/db)
 5. External integrations (src/services)

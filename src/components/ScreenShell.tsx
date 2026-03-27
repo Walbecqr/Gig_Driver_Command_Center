@@ -21,19 +21,19 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
-    backgroundColor: '#f7f7fa'
+    backgroundColor: '#f7f7fa',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
-    marginBottom: 8
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 12
+    marginBottom: 12,
   },
   body: {
-    flex: 1
-  }
+    flex: 1,
+  },
 });

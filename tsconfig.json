@@ -17,23 +17,11 @@
     "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "src",
-    "app",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/__tests__/*"
-  ]
+  "include": ["src", "app", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "**/__tests__/*"]
 }
