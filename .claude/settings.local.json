@@ -21,7 +21,10 @@
       "Bash(npx eslint:*)",
       "Bash(echo \"Exit: $?\")",
       "Bash(npx vitest:*)",
-      "Bash(grep -r Link node_modules/expo-router/*.d.ts)"
+      "Bash(grep -r Link node_modules/expo-router/*.d.ts)",
+      "Bash(ls -la c:/Users/Walbe/Gig_Driver_Command_Center/.env*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
