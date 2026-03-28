@@ -1,0 +1,5 @@
+# Custom Dictionary Words
+doordash
+dropoff
+grubhub
+rideshare
