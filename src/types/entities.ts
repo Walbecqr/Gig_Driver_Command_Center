@@ -41,6 +41,10 @@ export interface Offer {
   estimatedDistanceMiles: number;
   estimatedTimeMinutes: number;
   metadata?: Record<string, unknown>;
+  /** H3 cell index for the pickup location (resolution 9 by default). */
+  pickupZoneId?: string;
+  /** H3 cell index for the dropoff location (resolution 9 by default). */
+  dropoffZoneId?: string;
 }
 
 export interface Trip {
@@ -49,6 +53,10 @@ export interface Trip {
   startTime: string;
   endTime?: string;
   routeJson?: string;
+  /** H3 cell index for the primary pickup location. */
+  primaryPickupZoneId?: string;
+  /** H3 cell index for the primary dropoff location. */
+  primaryDropoffZoneId?: string;
 }
 
 export interface Delivery {
@@ -66,6 +74,20 @@ export interface Stop {
   type: 'pickup' | 'dropoff' | 'waypoint';
   address: string;
   sequence: number;
+  /** H3 cell index for this stop's location. Populated when lat/lng is known. */
+  zoneId?: string;
+}
+
+/** Aggregated metrics for an H3 zone over a discrete time bucket. */
+export interface ZoneTimeSeries {
+  zoneId: string;
+  bucketStartLocal: string;
+  bucketGrain: 'hour' | 'day' | 'week';
+  offersSeenCount: number;
+  offersAcceptedCount: number;
+  tripsCompletedCount: number;
+  grossAmountSum: number;
+  avgWaitMinutes: number | null;
 }
 
 export interface Expense {

@@ -114,6 +114,37 @@ const MIGRATIONS: Array<{ version: string; sql: string }> = [
       );
     `,
   },
+  {
+    // H3 zone fields on existing tables + zone_time_series aggregation table.
+    // SQLite does not support adding multiple columns in one ALTER TABLE
+    // statement, so each column is its own statement.
+    version: '002',
+    sql: `
+      ALTER TABLE offers ADD COLUMN pickup_zone_id TEXT;
+      ALTER TABLE offers ADD COLUMN dropoff_zone_id TEXT;
+
+      ALTER TABLE trips ADD COLUMN primary_pickup_zone_id TEXT;
+      ALTER TABLE trips ADD COLUMN primary_dropoff_zone_id TEXT;
+
+      ALTER TABLE stops ADD COLUMN zone_id TEXT;
+
+      CREATE TABLE IF NOT EXISTS zone_time_series (
+        zone_id            TEXT    NOT NULL,
+        bucket_start_local TEXT    NOT NULL,
+        bucket_grain       TEXT    NOT NULL DEFAULT 'hour',
+        offers_seen_count  INTEGER NOT NULL DEFAULT 0,
+        offers_accepted_count INTEGER NOT NULL DEFAULT 0,
+        trips_completed_count INTEGER NOT NULL DEFAULT 0,
+        gross_amount_sum   REAL    NOT NULL DEFAULT 0,
+        avg_wait_minutes   REAL,
+        updated_at         TEXT    NOT NULL,
+        PRIMARY KEY (zone_id, bucket_start_local)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_zone_ts_bucket
+        ON zone_time_series (bucket_start_local, zone_id);
+    `,
+  },
 ];
 
 export async function initLocalDatabase(): Promise<void> {
