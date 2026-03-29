@@ -26,7 +26,10 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(npm install:*)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Bash(npx tsx:*)",
+      "Bash(supabase migration:*)",
+      "Bash(supabase db:*)"
     ]
   }
 }

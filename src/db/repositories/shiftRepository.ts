@@ -1,12 +1,31 @@
 import { querySql, runSql } from '../index';
 import type { Shift } from '@/types/entities';
 
+// Column aliases bridge SQLite snake_case → TypeScript camelCase,
+// matching the pattern used in offerRepository and tripRepository.
+const SELECT_COLS = `
+  id,
+  user_id               AS userId,
+  platform_account_id   AS platformAccountId,
+  start_time            AS startTime,
+  end_time              AS endTime,
+  starting_mileage      AS startingMileage,
+  ending_mileage        AS endingMileage,
+  status,
+  notes
+`;
+
 export async function getAllShifts(): Promise<Shift[]> {
-  return querySql<Shift>('SELECT * FROM shifts ORDER BY start_time DESC;');
+  return querySql<Shift>(
+    `SELECT ${SELECT_COLS} FROM shifts ORDER BY start_time DESC;`,
+  );
 }
 
 export async function getShiftById(id: string): Promise<Shift | null> {
-  const rows = await querySql<Shift>('SELECT * FROM shifts WHERE id = ?;', [id]);
+  const rows = await querySql<Shift>(
+    `SELECT ${SELECT_COLS} FROM shifts WHERE id = ?;`,
+    [id],
+  );
   return rows[0] ?? null;
 }
 
