@@ -19,10 +19,18 @@
  */
 
 import { getZoneId } from '@/utils/h3';
-import { supabaseClient as supabase } from '@/services/supabase/client';
+import { supabaseClient, isSupabaseConfigured } from '@/services/supabase/client';
 import type { Json, Database } from '@/types/supabase.generated';
 
 type SourceTypeEnum = Database['public']['Enums']['source_type_enum'];
+
+/** Asserts Supabase is configured and returns the typed client. */
+function requireSupabase() {
+  if (!isSupabaseConfigured || !supabaseClient) {
+    throw new Error('[doordash] Supabase is not configured. Cannot perform ingestion.');
+  }
+  return supabaseClient;
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -91,6 +99,7 @@ export async function ingestDoorDashEarnings(
   batch: ImportBatchInput,
   rows: DoorDashEarningsRow[],
 ): Promise<string> {
+  const supabase = requireSupabase();
   const importBatchId = await createImportBatch(batch, 'weekly_statement_csv', rows.length);
 
   let parsedCount = 0;
@@ -136,7 +145,7 @@ export async function ingestDoorDashEarnings(
     if (tripError || !trip) continue;
 
     // Financial record
-    await supabase.from('trip_financials').insert({
+    const { error: finError } = await supabase.from('trip_financials').insert({
       trip_id: trip.trip_id,
       gross_amount: row.totalPay,
       base_fare: row.basePay,
@@ -145,13 +154,23 @@ export async function ingestDoorDashEarnings(
       fin_source_type: 'statement_csv',
     });
 
+    if (finError) {
+      console.warn('[doordash] trip_financials insert failed:', finError.message, { tripId: trip.trip_id });
+      continue;
+    }
+
     // Metrics record
-    await supabase.from('trip_metrics').insert({
+    const { error: metricsError } = await supabase.from('trip_metrics').insert({
       trip_id: trip.trip_id,
       distance_miles: row.distanceMiles,
       distance_source: 'statement',
       duration_source: 'statement',
     });
+
+    if (metricsError) {
+      console.warn('[doordash] trip_metrics insert failed:', metricsError.message, { tripId: trip.trip_id });
+      continue;
+    }
 
     parsedCount++;
   }
@@ -174,6 +193,7 @@ export async function ingestDoorDashOrders(
   batch: ImportBatchInput,
   rows: DoorDashOrderRow[],
 ): Promise<string> {
+  const supabase = requireSupabase();
   const importBatchId = await createImportBatch(batch, 'manual_csv', rows.length);
 
   let parsedCount = 0;
@@ -235,11 +255,17 @@ export async function ingestDoorDashOrders(
 
     // Update metrics with duration if available
     if (row.durationMinutes != null) {
-      await supabase
+      const { error: metricsError } = await supabase
         .from('trip_metrics')
-        .upsert({ trip_id: tripId, duration_minutes: row.durationMinutes,
-                   distance_source: 'derived', duration_source: 'statement' },
-                 { onConflict: 'trip_id' });
+        .upsert(
+          { trip_id: tripId, duration_minutes: row.durationMinutes,
+            distance_source: 'derived', duration_source: 'statement' },
+          { onConflict: 'trip_id' },
+        );
+
+      if (metricsError) {
+        console.warn('[doordash] trip_metrics upsert failed:', metricsError.message, { tripId });
+      }
     }
 
     // --- Pickup stop ---
@@ -248,7 +274,7 @@ export async function ingestDoorDashOrders(
         ? getZoneId(row.pickupLat, row.pickupLng)
         : null;
 
-    await supabase.from('stops').insert({
+    const { error: pickupError } = await supabase.from('stops').insert({
       trip_id: tripId,
       stop_sequence: 1,
       stop_type: 'pickup',
@@ -259,13 +285,18 @@ export async function ingestDoorDashOrders(
       zone_id: pickupZoneId,
     });
 
+    if (pickupError) {
+      console.warn('[doordash] pickup stop insert failed:', pickupError.message, { tripId });
+      continue;
+    }
+
     // --- Dropoff stop ---
     const dropoffZoneId =
       row.dropoffLat != null && row.dropoffLng != null
         ? getZoneId(row.dropoffLat, row.dropoffLng)
         : null;
 
-    await supabase.from('stops').insert({
+    const { error: dropoffError } = await supabase.from('stops').insert({
       trip_id: tripId,
       stop_sequence: 2,
       stop_type: 'dropoff',
@@ -276,15 +307,24 @@ export async function ingestDoorDashOrders(
       zone_id: dropoffZoneId,
     });
 
+    if (dropoffError) {
+      console.warn('[doordash] dropoff stop insert failed:', dropoffError.message, { tripId });
+      continue;
+    }
+
     // Backfill zone_ids onto the trip row itself for fast query without JOIN
     if (pickupZoneId || dropoffZoneId) {
-      await supabase
+      const { error: zoneBackfillError } = await supabase
         .from('trips')
         .update({
           pickup_zone_id: pickupZoneId ?? undefined,
           dropoff_zone_id: dropoffZoneId ?? undefined,
         })
         .eq('trip_id', tripId);
+
+      if (zoneBackfillError) {
+        console.warn('[doordash] zone backfill failed:', zoneBackfillError.message, { tripId });
+      }
     }
 
     parsedCount++;
@@ -303,6 +343,7 @@ async function createImportBatch(
   sourceType: SourceTypeEnum,
   rowCountRaw: number,
 ): Promise<string> {
+  const supabase = requireSupabase();
   const { data, error } = await supabase
     .from('import_batches')
     .insert({
@@ -330,6 +371,7 @@ async function finaliseImportBatch(
   total: number,
   parsed: number,
 ): Promise<void> {
+  const supabase = requireSupabase();
   const status = parsed === 0 ? 'failed' : parsed < total ? 'partial' : 'completed';
   await supabase
     .from('import_batches')

@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import ScreenShell from '@/components/ScreenShell';
 import { colors, spacing, typography, radius } from '@/lib/tokens';
 import { useShiftStore } from '@/state/shiftStore';
+import { useAppStore } from '@/state/appStore';
 import {
   startShift,
   endShift,
@@ -229,11 +230,10 @@ function StartShiftForm() {
   const [mileage, setMileage] = useState('');
   const queryClient = useQueryClient();
   const { setActiveShift } = useShiftStore();
+  const userId = useAppStore((s) => s.userId);
 
   const mutation = useMutation({
-    mutationFn: (miles: number) =>
-      // userId 'local' until Supabase auth is wired to the store
-      startShift('local', miles),
+    mutationFn: (miles: number) => startShift(userId ?? 'local', miles),
     onSuccess: (shift) => {
       setActiveShift(shift);
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
