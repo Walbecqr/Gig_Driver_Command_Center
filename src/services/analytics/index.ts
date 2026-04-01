@@ -1,5 +1,6 @@
 import { querySql, runSql } from '@/db';
 import type { ZoneTimeSeries } from '@/types/entities';
+import { captureException } from '@/services/crash';
 
 export function logEvent(eventName: string, payload?: Record<string, unknown>): void {
   console.debug('[analytics] event:', eventName, payload);
@@ -12,6 +13,7 @@ export function logEvent(eventName: string, payload?: Record<string, unknown>): 
  *
  * Groups by H3 zone_id + truncated bucket_start_local (default grain: 'hour').
  * Upserts rows so repeated calls over the same window are idempotent.
+ * Retries once after 500 ms on failure.
  *
  * @param startTime  ISO-8601 local datetime string, inclusive
  * @param endTime    ISO-8601 local datetime string, exclusive
@@ -21,6 +23,20 @@ export async function aggregateZoneMetrics(
   startTime: string,
   endTime: string,
   grain: ZoneTimeSeries['bucketGrain'] = 'hour',
+): Promise<void> {
+  try {
+    await runAggregation(startTime, endTime, grain);
+  } catch (err) {
+    captureException(err, { context: 'aggregateZoneMetrics/attempt1', startTime, endTime, grain });
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+    await runAggregation(startTime, endTime, grain);
+  }
+}
+
+async function runAggregation(
+  startTime: string,
+  endTime: string,
+  grain: ZoneTimeSeries['bucketGrain'],
 ): Promise<void> {
   // --- 1. Aggregate offer counts by zone ---
   const offerRows = await querySql<{

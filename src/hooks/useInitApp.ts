@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { initLocalDatabase } from '@/db';
-import { supabaseClient } from '@/services/supabase/client';
+import { supabaseClient, isSupabaseConfigured } from '@/services/supabase/client';
 import { useAppStore } from '@/state/appStore';
 import { captureException } from '@/services/crash';
 
 export function useInitApp() {
   const setDbReady = useAppStore((s) => s.setDbReady);
+  const setUserId = useAppStore((s) => s.setUserId);
 
   useEffect(() => {
     initLocalDatabase()
@@ -14,8 +15,15 @@ export function useInitApp() {
         captureException(error, { context: 'useInitApp/initLocalDatabase' });
       });
 
-    if (supabaseClient) {
-      supabaseClient.auth.getSession().catch(() => null);
+    if (isSupabaseConfigured && supabaseClient) {
+      supabaseClient.auth
+        .getSession()
+        .then(({ data: { session } }) => {
+          setUserId(session?.user?.id ?? null);
+        })
+        .catch((error) => {
+          captureException(error, { context: 'useInitApp/getSession' });
+        });
     }
-  }, [setDbReady]);
+  }, [setDbReady, setUserId]);
 }
