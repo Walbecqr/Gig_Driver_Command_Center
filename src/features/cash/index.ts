@@ -26,7 +26,10 @@ export { getLedgerForUser, deleteLedgerEntry };
 export interface AddLedgerEntryInput {
   userId: string;
   type: CashLedgerEntry['type'];
-  /** Always a positive value; type determines whether it adds or subtracts. */
+  /**
+   * For deposits and withdrawals: a positive value (sign is determined by type).
+   * For adjustments: a signed value — positive increases the balance, negative decreases it.
+   */
   amount: number;
   note?: string;
 }
@@ -41,7 +44,7 @@ export async function addLedgerEntry(input: AddLedgerEntryInput): Promise<CashLe
     id: generateId(),
     userId: input.userId,
     type: input.type,
-    amount: Math.abs(input.amount),
+    amount: input.type === 'adjustment' ? input.amount : Math.abs(input.amount),
     createdAt: new Date().toISOString(),
     note: input.note,
   };
