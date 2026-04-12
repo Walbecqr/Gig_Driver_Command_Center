@@ -1,5 +1,19 @@
 # Custom Dictionary Words
+ASOS
+AWOS
+dedup
 doordash
 dropoff
+FEMA
+FHWA
+finalise
+financials
+fkey
 grubhub
+Kaggle
+multilinestring
+multipolygon
+NHTSA
+NOAA
 rideshare
+usgs
