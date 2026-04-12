@@ -45,10 +45,7 @@ export interface MarketSummary {
  * @param hoursBack  Hours of history to include. Default 168 (7 days).
  * @param topN       Zones to return per category. Default 5.
  */
-export async function getMarketSummary(
-  hoursBack = 168,
-  topN = 5,
-): Promise<MarketSummary> {
+export async function getMarketSummary(hoursBack = 168, topN = 5): Promise<MarketSummary> {
   const cutoff = new Date(Date.now() - hoursBack * 60 * 60_000).toISOString();
 
   const rows = await querySql<{
@@ -88,16 +85,13 @@ export async function getMarketSummary(
       r.total_trips > 0 ? Math.round((r.total_gross / r.total_trips) * 100) / 100 : null,
     acceptanceRate:
       r.total_offers > 0 ? Math.round((r.total_accepted / r.total_offers) * 100) : null,
-    avgWaitMinutes:
-      r.avg_wait != null ? Math.round(r.avg_wait * 10) / 10 : null,
+    avgWaitMinutes: r.avg_wait != null ? Math.round(r.avg_wait * 10) / 10 : null,
   }));
 
   return {
     windowStart: rows[0]?.window_start ?? null,
     totalZones: insights.length,
-    topEarning: [...insights]
-      .sort((a, b) => b.totalGross - a.totalGross)
-      .slice(0, topN),
+    topEarning: [...insights].sort((a, b) => b.totalGross - a.totalGross).slice(0, topN),
     highAcceptance: [...insights]
       .filter((z) => z.totalOffers >= 5 && z.acceptanceRate != null)
       .sort((a, b) => (b.acceptanceRate ?? 0) - (a.acceptanceRate ?? 0))
@@ -121,7 +115,7 @@ export async function getNearbyZoneInsights(
   const nearby = getNeighborZones(zoneId, k);
   if (nearby.length === 0) return [];
 
-  const cutoff       = new Date(Date.now() - hoursBack * 60 * 60_000).toISOString();
+  const cutoff = new Date(Date.now() - hoursBack * 60 * 60_000).toISOString();
   const placeholders = nearby.map(() => '?').join(', ');
 
   const rows = await querySql<{
@@ -155,7 +149,6 @@ export async function getNearbyZoneInsights(
       r.total_trips > 0 ? Math.round((r.total_gross / r.total_trips) * 100) / 100 : null,
     acceptanceRate:
       r.total_offers > 0 ? Math.round((r.total_accepted / r.total_offers) * 100) : null,
-    avgWaitMinutes:
-      r.avg_wait != null ? Math.round(r.avg_wait * 10) / 10 : null,
+    avgWaitMinutes: r.avg_wait != null ? Math.round(r.avg_wait * 10) / 10 : null,
   }));
 }

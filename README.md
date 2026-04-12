@@ -78,18 +78,18 @@ See [docs/architecture.md](docs/architecture.md), [docs/project-structure.md](do
 
 ## 5) Tech stack
 
-| Layer | Library |
-| --- | --- |
-| Framework | Expo 55 + React Native 0.84 |
-| Language | TypeScript 5.5 (strict mode) |
-| Routing | Expo Router |
-| State | Zustand 4.4 |
-| Server state | TanStack React Query 5.4 |
-| Local DB | expo-sqlite |
-| Backend | Supabase (auth + Postgres) |
-| Validation | Zod 3.23 |
-| Testing | Vitest 4 + @testing-library/react-native |
-| Linting | ESLint 8 + @typescript-eslint + Prettier 3 |
+| Layer        | Library                                    |
+| ------------ | ------------------------------------------ |
+| Framework    | Expo 55 + React Native 0.84                |
+| Language     | TypeScript 5.5 (strict mode)               |
+| Routing      | Expo Router                                |
+| State        | Zustand 4.4                                |
+| Server state | TanStack React Query 5.4                   |
+| Local DB     | expo-sqlite                                |
+| Backend      | Supabase (auth + Postgres)                 |
+| Validation   | Zod 3.23                                   |
+| Testing      | Vitest 4 + @testing-library/react-native   |
+| Linting      | ESLint 8 + @typescript-eslint + Prettier 3 |
 
 ## 6) What is implemented
 

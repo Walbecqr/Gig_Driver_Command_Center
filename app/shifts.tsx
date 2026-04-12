@@ -44,7 +44,9 @@ function fmtTime(iso: string): string {
 /** Format a local date as "Mon Dec 12". */
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString([], {
-    weekday: 'short', month: 'short', day: 'numeric',
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
   });
 }
 
@@ -70,8 +72,8 @@ function useElapsed(startTime: string | undefined): string {
 // ---------------------------------------------------------------------------
 
 function ActiveShiftCard({ shift }: { shift: Shift }) {
-  const elapsed   = useElapsed(shift.startTime);
-  const isPaused  = shift.status === 'paused';
+  const elapsed = useElapsed(shift.startTime);
+  const isPaused = shift.status === 'paused';
   const queryClient = useQueryClient();
   const { setActiveShift } = useShiftStore();
 
@@ -119,12 +121,11 @@ function ActiveShiftCard({ shift }: { shift: Shift }) {
     }
     Alert.alert(
       'End shift?',
-      `${formatElapsed(Date.now() - new Date(shift.startTime).getTime())} · `
-      + `${(miles - shift.startingMileage).toFixed(1)} mi driven`,
+      `${formatElapsed(Date.now() - new Date(shift.startTime).getTime())} · ` +
+        `${(miles - shift.startingMileage).toFixed(1)} mi driven`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'End Shift', style: 'destructive',
-          onPress: () => endMutation.mutate(miles) },
+        { text: 'End Shift', style: 'destructive', onPress: () => endMutation.mutate(miles) },
       ],
     );
   };
@@ -139,9 +140,7 @@ function ActiveShiftCard({ shift }: { shift: Shift }) {
         <Text style={[styles.activeStatus, { color: statusColor }]}>
           {isPaused ? 'PAUSED' : 'ACTIVE'}
         </Text>
-        <Text style={styles.activeStarted}>
-          started {fmtTime(shift.startTime)}
-        </Text>
+        <Text style={styles.activeStarted}>started {fmtTime(shift.startTime)}</Text>
       </View>
 
       {/* Stats */}
@@ -151,9 +150,7 @@ function ActiveShiftCard({ shift }: { shift: Shift }) {
           <Text style={styles.statLabel}>Elapsed</Text>
         </View>
         <View style={styles.stat}>
-          <Text style={styles.statValue}>
-            {shift.startingMileage.toLocaleString()}
-          </Text>
+          <Text style={styles.statValue}>{shift.startingMileage.toLocaleString()}</Text>
           <Text style={styles.statLabel}>Start odometer</Text>
         </View>
       </View>
@@ -162,25 +159,27 @@ function ActiveShiftCard({ shift }: { shift: Shift }) {
       <View style={styles.rowBtns}>
         {isPaused ? (
           <TouchableOpacity
-            style={[styles.btn, styles.btnSuccess,
-                    resumeMutation.isPending && styles.disabled]}
+            style={[styles.btn, styles.btnSuccess, resumeMutation.isPending && styles.disabled]}
             disabled={resumeMutation.isPending}
             onPress={() => resumeMutation.mutate()}
           >
-            {resumeMutation.isPending
-              ? <ActivityIndicator color="#fff" size="small" />
-              : <Text style={styles.btnText}>Resume</Text>}
+            {resumeMutation.isPending ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.btnText}>Resume</Text>
+            )}
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={[styles.btn, styles.btnWarning,
-                    pauseMutation.isPending && styles.disabled]}
+            style={[styles.btn, styles.btnWarning, pauseMutation.isPending && styles.disabled]}
             disabled={pauseMutation.isPending}
             onPress={() => pauseMutation.mutate()}
           >
-            {pauseMutation.isPending
-              ? <ActivityIndicator color="#fff" size="small" />
-              : <Text style={styles.btnText}>Pause</Text>}
+            {pauseMutation.isPending ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.btnText}>Pause</Text>
+            )}
           </TouchableOpacity>
         )}
 
@@ -207,14 +206,15 @@ function ActiveShiftCard({ shift }: { shift: Shift }) {
             returnKeyType="done"
           />
           <TouchableOpacity
-            style={[styles.btn, styles.btnError,
-                    endMutation.isPending && styles.disabled]}
+            style={[styles.btn, styles.btnError, endMutation.isPending && styles.disabled]}
             disabled={endMutation.isPending}
             onPress={handleEnd}
           >
-            {endMutation.isPending
-              ? <ActivityIndicator color="#fff" size="small" />
-              : <Text style={styles.btnText}>Confirm End Shift</Text>}
+            {endMutation.isPending ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.btnText}>Confirm End Shift</Text>
+            )}
           </TouchableOpacity>
         </View>
       )}
@@ -266,14 +266,20 @@ function StartShiftForm() {
       />
 
       <TouchableOpacity
-        style={[styles.btn, styles.btnPrimary, { marginTop: spacing.xs },
-                mutation.isPending && styles.disabled]}
+        style={[
+          styles.btn,
+          styles.btnPrimary,
+          { marginTop: spacing.xs },
+          mutation.isPending && styles.disabled,
+        ]}
         disabled={mutation.isPending}
         onPress={handleStart}
       >
-        {mutation.isPending
-          ? <ActivityIndicator color="#fff" size="small" />
-          : <Text style={styles.btnText}>Start Shift</Text>}
+        {mutation.isPending ? (
+          <ActivityIndicator color="#fff" size="small" />
+        ) : (
+          <Text style={styles.btnText}>Start Shift</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -285,9 +291,9 @@ function StartShiftForm() {
 
 function ShiftRow({ shift }: { shift: Shift }) {
   const startMs = new Date(shift.startTime).getTime();
-  const endMs   = shift.endTime ? new Date(shift.endTime).getTime() : null;
+  const endMs = shift.endTime ? new Date(shift.endTime).getTime() : null;
   const duration = endMs ? formatElapsed(endMs - startMs) : 'in progress';
-  const miles    =
+  const miles =
     shift.endingMileage != null
       ? (shift.endingMileage - shift.startingMileage).toFixed(1) + ' mi'
       : '—';
@@ -327,13 +333,8 @@ export default function ShiftsScreen() {
 
   return (
     <ScreenShell title="Shift Tracker" subtitle="Track start/end time and mileage">
-
       {/* Active shift card OR start form */}
-      {activeShift ? (
-        <ActiveShiftCard shift={activeShift} />
-      ) : (
-        <StartShiftForm />
-      )}
+      {activeShift ? <ActiveShiftCard shift={activeShift} /> : <StartShiftForm />}
 
       {/* Shift history */}
       {isLoading ? (
@@ -351,7 +352,6 @@ export default function ShiftsScreen() {
       ) : !activeShift ? (
         <Text style={styles.emptyText}>No shifts recorded yet.</Text>
       ) : null}
-
     </ScreenShell>
   );
 }
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
   btnPrimary: { backgroundColor: colors.primary },
   btnSuccess: { backgroundColor: colors.success },
   btnWarning: { backgroundColor: colors.warning },
-  btnError:   { backgroundColor: colors.error },
+  btnError: { backgroundColor: colors.error },
   btnGhost: {
     borderWidth: 1,
     borderColor: colors.error,

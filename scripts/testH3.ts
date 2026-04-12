@@ -30,7 +30,7 @@ console.log('\n=== 1. getZoneId() — coordinate → H3 cell ===\n');
 
 for (const coord of TEST_COORDS) {
   const zoneId = getZoneId(coord.lat, coord.lng);
-  const res    = getZoneResolution(zoneId);
+  const res = getZoneResolution(zoneId);
   console.log(`  ${coord.label}`);
   console.log(`    lat/lng : ${coord.lat}, ${coord.lng}`);
   console.log(`    zone_id : ${zoneId}  (res ${res})`);
@@ -62,12 +62,14 @@ console.log('=== 3. Round-trip: cell → center → cell ===\n');
 
 let allPassed = true;
 for (const coord of TEST_COORDS) {
-  const zoneId        = getZoneId(coord.lat, coord.lng);
-  const [cLat, cLng]  = getZoneCenter(zoneId);
-  const roundTripped  = getZoneId(cLat, cLng);
+  const zoneId = getZoneId(coord.lat, coord.lng);
+  const [cLat, cLng] = getZoneCenter(zoneId);
+  const roundTripped = getZoneId(cLat, cLng);
   const ok = roundTripped === zoneId;
   if (!ok) allPassed = false;
-  console.log(`  ${coord.label}: ${ok ? '✓ idempotent' : `✗ MISMATCH (${zoneId} ≠ ${roundTripped})`}`);
+  console.log(
+    `  ${coord.label}: ${ok ? '✓ idempotent' : `✗ MISMATCH (${zoneId} ≠ ${roundTripped})`}`,
+  );
 }
 console.log();
 

@@ -26,16 +26,12 @@ export async function getOffersForShift(shiftId: string): Promise<Offer[]> {
 }
 
 export async function getOfferById(id: string): Promise<Offer | null> {
-  const rows = await querySql<Offer>(
-    `SELECT ${SELECT_COLS} FROM offers WHERE id = ?;`,
-    [id],
-  );
+  const rows = await querySql<Offer>(`SELECT ${SELECT_COLS} FROM offers WHERE id = ?;`, [id]);
   return rows[0] ?? null;
 }
 
 export async function upsertOffer(offer: Offer): Promise<void> {
-  const metadata =
-    offer.metadata != null ? JSON.stringify(offer.metadata) : null;
+  const metadata = offer.metadata != null ? JSON.stringify(offer.metadata) : null;
 
   await runSql(
     `INSERT OR REPLACE INTO offers
@@ -62,12 +58,9 @@ export async function upsertOffer(offer: Offer): Promise<void> {
   );
 }
 
-export async function updateOfferStatus(
-  id: string,
-  status: Offer['status'],
-): Promise<void> {
-  await runSql(
-    `UPDATE offers SET status = ?, updated_at = datetime('now') WHERE id = ?;`,
-    [status, id],
-  );
+export async function updateOfferStatus(id: string, status: Offer['status']): Promise<void> {
+  await runSql(`UPDATE offers SET status = ?, updated_at = datetime('now') WHERE id = ?;`, [
+    status,
+    id,
+  ]);
 }

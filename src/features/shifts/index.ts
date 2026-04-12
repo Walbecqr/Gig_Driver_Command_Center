@@ -53,10 +53,7 @@ export async function startShift(
  * immediately. Failures are logged but do not surface to the user since
  * the data can be re-aggregated later.
  */
-export async function endShift(
-  shiftId: string,
-  endingMileage: number,
-): Promise<void> {
+export async function endShift(shiftId: string, endingMileage: number): Promise<void> {
   const shift = await getShiftById(shiftId);
   if (!shift) throw new Error(`Shift ${shiftId} not found`);
 
