@@ -99,10 +99,11 @@ const VARIABLE_MAP: Record<string, { key: string; units: string | null }> = {
 // ----------------------------------------------------------------
 
 /**
- * Parse Census API "array-of-arrays" response.
+ * Parses a Census API "array-of-arrays" response into normalized CensusAcsRow entries.
  *
- * @param data  The raw JSON array from the Census API (header row + data rows).
- * @param vintage  Source vintage label, e.g. "ACS 2022 5-year".
+ * @param data - Array where the first element is a header row and subsequent elements are data rows as returned by the Census API.
+ * @param vintage - Optional source vintage label (for example, "ACS 2022 5-year").
+ * @returns A list of parsed Census rows (one per data row). Returns an empty array when `data` is not an array or has fewer than two rows.
  */
 export function parseCensusAcsArrayFormat(
   data: string[][],
@@ -172,13 +173,13 @@ export function parseCensusAcsArrayFormat(
 // ----------------------------------------------------------------
 
 /**
- * Parse a Census-derived file that has already been pivoted to an array of
- * objects.  Each object must have a 'geoid' field; all other numeric fields
- * are mapped through VARIABLE_MAP.  Unknown fields are stored as-is in
- * rawRecord.
+ * Convert an array of pivoted Census ACS records into normalized CensusAcsRow entries.
  *
- * @param data     Array of plain objects.
- * @param vintage  Source vintage label.
+ * Returns an empty array when given a non-array input.
+ *
+ * @param data - Array of plain objects whose keys may include Census variable codes (case-insensitive); unknown keys are preserved in each row's `rawRecord`.
+ * @param vintage - Optional source vintage label to attach to each output row; `null` if omitted.
+ * @returns An array of CensusAcsRow objects containing parsed `geoid`, `name`, optional centroid coordinates, mapped `metrics`, and the original `rawRecord`.
  */
 export function parseCensusAcsObjectFormat(
   data: Record<string, unknown>[],

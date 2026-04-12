@@ -52,13 +52,14 @@ export interface ReferenceIngestBatchParams {
 // ----------------------------------------------------------------
 
 /**
- * Upsert a reference_datasets row by slug and return its UUID.
+ * Ensure a reference dataset row exists or is updated and return its UUID.
  *
- * If a row with the same slug already exists, its metadata is updated
- * and the existing UUID is returned.  If slug is absent the row is
- * inserted fresh (no conflict resolution — callers should always pass a slug).
+ * Performs an idempotent upsert into the `reference_datasets` table using the
+ * dataset slug as the conflict target; absent optional fields are written as
+ * `null`.
  *
- * @throws if the upsert fails.
+ * @returns The UUID of the upserted reference dataset.
+ * @throws If the database upsert fails or no row is returned.
  */
 export async function ensureReferenceDataset(
   params: ReferenceDatasetParams,
@@ -96,12 +97,12 @@ export async function ensureReferenceDataset(
 // ----------------------------------------------------------------
 
 /**
- * Insert a reference_ingest_batches row and return its UUID.
+ * Insert a row into `reference_ingest_batches` and return its UUID.
  *
- * The batch starts with ingest_status = 'processing'; call
- * finaliseReferenceIngestBatch() once all rows have been written.
+ * The batch is created with `ingest_status` set to `'processing'`.
  *
- * @throws if the insert fails.
+ * @returns The UUID of the newly created reference ingest batch.
+ * @throws If the insert fails.
  */
 export async function createReferenceIngestBatch(
   params: ReferenceIngestBatchParams,
@@ -132,12 +133,14 @@ export async function createReferenceIngestBatch(
 // ----------------------------------------------------------------
 
 /**
- * Mark a reference_ingest_batches row as completed / partial / failed.
+ * Finalizes an ingest batch by updating its parsed count and overall ingest status.
  *
- * Status logic:
- *   parsed === 0          → 'failed'
- *   parsed < total        → 'partial'
- *   parsed === total      → 'completed'
+ * The ingest status is set based on `parsed` versus `total`: `parsed === 0` → `failed`, `parsed < total` → `partial`, otherwise `completed`.
+ *
+ * @param referenceIngestBatchId - UUID of the `reference_ingest_batches` row to update
+ * @param total - Total number of source records expected
+ * @param parsed - Number of records successfully parsed
+ * @param notes - Optional notes to store on the ingest batch; when omitted no notes field is modified
  */
 export async function finaliseReferenceIngestBatch(
   referenceIngestBatchId: string,
