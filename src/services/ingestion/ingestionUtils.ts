@@ -3,15 +3,13 @@
  *
  * Provides import_batch lifecycle management (create → finalise) and the
  * simpleHash dedup utility used by all Kaggle ingestion services.
- *
- * Note: 'kaggle_csv', 'simulation', and 'synthetic' are new enum values added
- * in migration 20260329000002_kaggle_datasets.sql. Until `supabase gen types
- * typescript` is re-run against the updated schema, those values are not
- * present in the generated Database type, so the platform and sourceType
- * parameters are typed as `string` here to avoid compilation errors.
  */
 
 import { supabaseClient as supabase } from '@/services/supabase/client';
+import type { Database } from '@/types/supabase.generated';
+
+type PlatformEnum   = Database['public']['Enums']['platform_enum'];
+type SourceTypeEnum = Database['public']['Enums']['source_type_enum'];
 
 export interface ImportBatchInput {
   userId: string;
@@ -28,18 +26,14 @@ export interface ImportBatchInput {
 /**
  * Insert an import_batches row and return its generated UUID.
  * Throws if the insert fails (e.g. duplicate file hash for the same account).
- *
- * @param platform   Value of platform_enum (accepts new 'synthetic' value).
- * @param sourceType Value of source_type_enum (accepts new 'kaggle_csv' / 'simulation').
  */
 export async function createImportBatch(
   batch: ImportBatchInput,
-  platform: string,
-  sourceType: string,
+  platform: PlatformEnum,
+  sourceType: SourceTypeEnum,
   rowCountRaw: number,
 ): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('import_batches')
     .insert({
       user_id: batch.userId,
@@ -58,7 +52,7 @@ export async function createImportBatch(
     .single();
 
   if (error || !data) throw new Error(`Failed to create import_batch: ${error?.message}`);
-  return (data as { import_batch_id: string }).import_batch_id;
+  return data.import_batch_id;
 }
 
 /** Mark an import_batch as completed / partial / failed based on parse counts. */

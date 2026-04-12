@@ -7,10 +7,6 @@
  * external_conditions is shared reference data (not per-user), so a single
  * import_batch is created per file for traceability; the platform is set to
  * 'unknown' since the dataset spans both Uber and Lyft.
- *
- * Note: external_conditions is not yet in the auto-generated Supabase types.
- * The `db` cast below can be removed after running:
- *   supabase gen types typescript --local > src/types/supabase.generated.ts
  */
 
 import { supabaseClient as supabase } from '@/services/supabase/client';
@@ -25,10 +21,6 @@ import {
 import type { WeatherConditionRow } from './weatherConditionsParser';
 
 export type { ImportBatchInput };
-
-// Typed cast needed until supabase.generated.ts is regenerated post-migration.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any;
 
 /**
  * Ingest a parsed Uber/Lyft + Weather Kaggle CSV into public.external_conditions.
@@ -66,7 +58,7 @@ export async function ingestWeatherConditions(
         ? getZoneId(row.latitude, row.longitude)
         : null;
 
-    const { error: insertError } = await db
+    const { error: insertError } = await supabase
       .from('external_conditions')
       .insert({
         recorded_at: row.recordedAt,

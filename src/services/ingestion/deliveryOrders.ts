@@ -5,15 +5,12 @@
  *   import_batches → raw_import_records
  *     → trips + trip_financials + trip_metrics + stops (when lat/lng present)
  *
- * platform              = 'synthetic'   (enum value added in migration 002)
- * source_type           = 'simulation'  (enum value added in migration 002)
- * completion_confidence = 0.5           (simulation data, lower fidelity)
+ * platform              = 'synthetic'
+ * source_type           = 'simulation'
+ * completion_confidence = 0.5  (simulation data, lower fidelity)
  *
  * H3 zone_ids computed at ingest time and backfilled onto the trip row for
  * fast zone-grouping queries without a JOIN.
- *
- * Note: 'synthetic' is not yet in the auto-generated Supabase types. The cast
- * on `trips.platform` below can be removed after regenerating types.
  */
 
 import { supabaseClient as supabase } from '@/services/supabase/client';
@@ -69,8 +66,7 @@ export async function ingestDeliveryOrders(
         ? getZoneId(row.dropoffLat, row.dropoffLng)
         : null;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: trip, error: tripError } = await (supabase as any)
+    const { data: trip, error: tripError } = await supabase
       .from('trips')
       .insert({
         user_id: batch.userId,
@@ -91,13 +87,13 @@ export async function ingestDeliveryOrders(
     if (tripError || !trip) continue;
 
     await supabase.from('trip_financials').insert({
-      trip_id: (trip as { trip_id: string }).trip_id,
+      trip_id: trip.trip_id,
       gross_amount: row.grossAmount,
       fin_source_type: 'derived',
     });
 
     await supabase.from('trip_metrics').insert({
-      trip_id: (trip as { trip_id: string }).trip_id,
+      trip_id: trip.trip_id,
       distance_miles: row.distanceMiles,
       duration_minutes: row.durationMinutes ?? undefined,
       distance_source: 'derived',
@@ -105,7 +101,7 @@ export async function ingestDeliveryOrders(
       metric_confidence: 0.5,
     });
 
-    const tripId = (trip as { trip_id: string }).trip_id;
+    const tripId = trip.trip_id;
 
     if (row.pickupLat != null && row.pickupLng != null) {
       await supabase.from('stops').insert({

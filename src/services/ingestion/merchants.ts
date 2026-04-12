@@ -11,10 +11,6 @@
  *
  * H3 zone_id is computed at ingest time from lat/lng so downstream
  * zone-scoring queries can group by zone_id without a second pass.
- *
- * Note: merchant_locations is not yet in the auto-generated Supabase types.
- * The `db` cast below can be removed after running:
- *   supabase gen types typescript --local > src/types/supabase.generated.ts
  */
 
 import { supabaseClient as supabase } from '@/services/supabase/client';
@@ -29,10 +25,6 @@ import {
 import type { MerchantRow } from './merchantParser';
 
 export type { ImportBatchInput };
-
-// Typed cast needed until supabase.generated.ts is regenerated post-migration.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any;
 
 /**
  * Ingest a parsed restaurant Kaggle CSV into public.merchant_locations.
@@ -73,7 +65,7 @@ export async function ingestMerchants(
         : null;
 
     // Upsert: conflict on (platform, name, latitude, longitude) → skip duplicate
-    const { error: upsertError } = await db
+    const { error: upsertError } = await supabase
       .from('merchant_locations')
       .upsert(
         {
