@@ -20,15 +20,15 @@ import { getMarketSummary, type ZoneInsight } from '@/features/market';
 type Tab = 'earning' | 'acceptance' | 'wait';
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'earning',    label: 'Top Earning'  },
-  { id: 'acceptance', label: 'Best Accept'  },
-  { id: 'wait',       label: 'Fast Pickup'  },
+  { id: 'earning', label: 'Top Earning' },
+  { id: 'acceptance', label: 'Best Accept' },
+  { id: 'wait', label: 'Fast Pickup' },
 ];
 
 const WINDOWS = [
-  { label: '24h',  hours: 24   },
-  { label: '7d',   hours: 168  },
-  { label: '30d',  hours: 720  },
+  { label: '24h', hours: 24 },
+  { label: '7d', hours: 168 },
+  { label: '30d', hours: 720 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -38,21 +38,26 @@ const WINDOWS = [
 function ZoneCard({ insight, rank, tab }: { insight: ZoneInsight; rank: number; tab: Tab }) {
   const primary =
     tab === 'earning'
-      ? { label: 'Avg/trip', value: insight.avgEarningsPerTrip != null
-            ? `$${insight.avgEarningsPerTrip.toFixed(2)}` : '—' }
+      ? {
+          label: 'Avg/trip',
+          value:
+            insight.avgEarningsPerTrip != null ? `$${insight.avgEarningsPerTrip.toFixed(2)}` : '—',
+        }
       : tab === 'acceptance'
-      ? { label: 'Accept rate', value: insight.acceptanceRate != null
-            ? `${insight.acceptanceRate}%` : '—' }
-      : { label: 'Avg wait', value: insight.avgWaitMinutes != null
-            ? `${insight.avgWaitMinutes} min` : '—' };
+        ? {
+            label: 'Accept rate',
+            value: insight.acceptanceRate != null ? `${insight.acceptanceRate}%` : '—',
+          }
+        : {
+            label: 'Avg wait',
+            value: insight.avgWaitMinutes != null ? `${insight.avgWaitMinutes} min` : '—',
+          };
 
   // Short human-readable zone label from H3 index
   const zoneLabel = insight.zoneId.slice(0, 12);
 
   const rankColor =
-    rank === 1 ? '#F59E0B' :
-    rank === 2 ? '#9CA3AF' :
-    rank === 3 ? '#B45309' : colors.textMuted;
+    rank === 1 ? '#F59E0B' : rank === 2 ? '#9CA3AF' : rank === 3 ? '#B45309' : colors.textMuted;
 
   return (
     <View style={styles.card}>
@@ -82,9 +87,7 @@ function ZoneCard({ insight, rank, tab }: { insight: ZoneInsight; rank: number; 
             <Text style={styles.secondaryLabel}>offers</Text>
           </View>
           <View style={styles.secondaryStat}>
-            <Text style={styles.secondaryValue}>
-              ${insight.totalGross.toFixed(0)}
-            </Text>
+            <Text style={styles.secondaryValue}>${insight.totalGross.toFixed(0)}</Text>
             <Text style={styles.secondaryLabel}>gross</Text>
           </View>
         </View>
@@ -102,16 +105,14 @@ function EmptyState({ tab }: { tab: Tab }) {
     tab === 'acceptance'
       ? 'Need at least 5 offers per zone to appear here.'
       : tab === 'wait'
-      ? 'Need at least 3 completed trips per zone to appear here.'
-      : 'Complete a shift to generate zone data.';
+        ? 'Need at least 3 completed trips per zone to appear here.'
+        : 'Complete a shift to generate zone data.';
 
   return (
     <View style={styles.emptyWrap}>
       <Text style={styles.emptyTitle}>No zone data yet</Text>
       <Text style={styles.emptyHint}>{hint}</Text>
-      <Text style={styles.emptyHint}>
-        Data is generated automatically when you end a shift.
-      </Text>
+      <Text style={styles.emptyHint}>Data is generated automatically when you end a shift.</Text>
     </View>
   );
 }
@@ -121,8 +122,8 @@ function EmptyState({ tab }: { tab: Tab }) {
 // ---------------------------------------------------------------------------
 
 export default function MarketScreen() {
-  const [tab, setTab]         = useState<Tab>('earning');
-  const [windowIdx, setWin]   = useState(1); // default 7d
+  const [tab, setTab] = useState<Tab>('earning');
+  const [windowIdx, setWin] = useState(1); // default 7d
 
   const hours = WINDOWS[windowIdx]!.hours;
 
@@ -133,9 +134,11 @@ export default function MarketScreen() {
   });
 
   const zones: ZoneInsight[] =
-    tab === 'earning'    ? (data?.topEarning    ?? []) :
-    tab === 'acceptance' ? (data?.highAcceptance ?? []) :
-                           (data?.fastPickup     ?? []);
+    tab === 'earning'
+      ? (data?.topEarning ?? [])
+      : tab === 'acceptance'
+        ? (data?.highAcceptance ?? [])
+        : (data?.fastPickup ?? []);
 
   const windowStart = data?.windowStart
     ? new Date(data.windowStart).toLocaleDateString([], { month: 'short', day: 'numeric' })
@@ -143,7 +146,6 @@ export default function MarketScreen() {
 
   return (
     <ScreenShell title="Market Intel" subtitle="Zone performance from your driving history">
-
       {/* Window selector */}
       <View style={styles.windowRow}>
         {WINDOWS.map((w, i) => (
@@ -163,9 +165,11 @@ export default function MarketScreen() {
           onPress={() => refetch()}
           disabled={isRefetching}
         >
-          {isRefetching
-            ? <ActivityIndicator size="small" color={colors.primary} />
-            : <Text style={styles.refreshText}>↻</Text>}
+          {isRefetching ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : (
+            <Text style={styles.refreshText}>↻</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -185,9 +189,7 @@ export default function MarketScreen() {
             style={[styles.tab, tab === t.id && styles.tabActive]}
             onPress={() => setTab(t.id)}
           >
-            <Text style={[styles.tabText, tab === t.id && styles.tabTextActive]}>
-              {t.label}
-            </Text>
+            <Text style={[styles.tabText, tab === t.id && styles.tabTextActive]}>{t.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -201,14 +203,11 @@ export default function MarketScreen() {
         <FlatList
           data={zones}
           keyExtractor={(z) => z.zoneId}
-          renderItem={({ item, index }) => (
-            <ZoneCard insight={item} rank={index + 1} tab={tab} />
-          )}
+          renderItem={({ item, index }) => <ZoneCard insight={item} rank={index + 1} tab={tab} />}
           scrollEnabled={false}
           ItemSeparatorComponent={() => <View style={{ height: spacing.xs }} />}
         />
       )}
-
     </ScreenShell>
   );
 }

@@ -18,17 +18,17 @@ import { getZoneId, getNeighborZones, getZoneCenter, getZoneResolution } from '.
 // ---------------------------------------------------------------------------
 
 const TEST_COORDS: Array<{ label: string; lat: number; lng: number }> = [
-  { label: 'Times Square, NYC',       lat: 40.7580,  lng: -73.9855 },
-  { label: 'Wrigley Field, Chicago',  lat: 41.9484,  lng: -87.6553 },
-  { label: 'Downtown LA',             lat: 34.0522,  lng: -118.2437 },
-  { label: 'Miami Beach',             lat: 25.7907,  lng: -80.1300 },
+  { label: 'Times Square, NYC', lat: 40.758, lng: -73.9855 },
+  { label: 'Wrigley Field, Chicago', lat: 41.9484, lng: -87.6553 },
+  { label: 'Downtown LA', lat: 34.0522, lng: -118.2437 },
+  { label: 'Miami Beach', lat: 25.7907, lng: -80.13 },
 ];
 
 console.log('\n=== 1. getZoneId() — coordinate → H3 cell ===\n');
 
 for (const coord of TEST_COORDS) {
   const zoneId = getZoneId(coord.lat, coord.lng);
-  const res    = getZoneResolution(zoneId);
+  const res = getZoneResolution(zoneId);
   console.log(`  ${coord.label}`);
   console.log(`    lat/lng : ${coord.lat}, ${coord.lng}`);
   console.log(`    zone_id : ${zoneId}  (res ${res})`);
@@ -41,7 +41,7 @@ for (const coord of TEST_COORDS) {
 
 console.log('=== 2. getNeighborZones() — ring sizes ===\n');
 
-const pivot = getZoneId(40.7580, -73.9855); // Times Square
+const pivot = getZoneId(40.758, -73.9855); // Times Square
 
 for (const k of [0, 1, 2]) {
   const neighbors = getNeighborZones(pivot, k);
@@ -60,12 +60,14 @@ console.log('=== 3. Round-trip: cell → center → cell ===\n');
 
 let allPassed = true;
 for (const coord of TEST_COORDS) {
-  const zoneId        = getZoneId(coord.lat, coord.lng);
-  const [cLat, cLng]  = getZoneCenter(zoneId);
-  const roundTripped  = getZoneId(cLat, cLng);
+  const zoneId = getZoneId(coord.lat, coord.lng);
+  const [cLat, cLng] = getZoneCenter(zoneId);
+  const roundTripped = getZoneId(cLat, cLng);
   const ok = roundTripped === zoneId;
   if (!ok) allPassed = false;
-  console.log(`  ${coord.label}: ${ok ? '✓ idempotent' : `✗ MISMATCH (${zoneId} ≠ ${roundTripped})`}`);
+  console.log(
+    `  ${coord.label}: ${ok ? '✓ idempotent' : `✗ MISMATCH (${zoneId} ≠ ${roundTripped})`}`,
+  );
 }
 console.log();
 
@@ -82,7 +84,7 @@ if (allPassed) {
 
 console.log('=== 4. Example zone_time_series queries ===\n');
 
-const exampleZone = getZoneId(40.7580, -73.9855);
+const exampleZone = getZoneId(40.758, -73.9855);
 
 console.log('-- SQLite (local): hourly metrics for a zone over 24 h');
 console.log(`SELECT

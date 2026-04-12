@@ -29,7 +29,8 @@
       "Bash(npm audit:*)",
       "Bash(npx tsx:*)",
       "Bash(supabase migration:*)",
-      "Bash(supabase db:*)"
+      "Bash(supabase db:*)",
+      "Bash(wc -l /c/Users/Walbe/Gig_Driver_Command_Center/supabase/migrations/uber_weekly _statement_csv_import/*.sql)"
     ]
   }
 }

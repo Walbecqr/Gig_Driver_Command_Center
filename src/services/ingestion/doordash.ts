@@ -235,11 +235,15 @@ export async function ingestDoorDashOrders(
 
     // Update metrics with duration if available
     if (row.durationMinutes != null) {
-      await supabase
-        .from('trip_metrics')
-        .upsert({ trip_id: tripId, duration_minutes: row.durationMinutes,
-                   distance_source: 'derived', duration_source: 'statement' },
-                 { onConflict: 'trip_id' });
+      await supabase.from('trip_metrics').upsert(
+        {
+          trip_id: tripId,
+          duration_minutes: row.durationMinutes,
+          distance_source: 'derived',
+          duration_source: 'statement',
+        },
+        { onConflict: 'trip_id' },
+      );
     }
 
     // --- Pickup stop ---

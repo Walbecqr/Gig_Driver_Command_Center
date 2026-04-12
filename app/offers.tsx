@@ -37,10 +37,10 @@ function OfferCard({
   const isPending = offer.status === 'pending';
 
   const statusColor: Record<Offer['status'], string> = {
-    pending:  colors.warning,
+    pending: colors.warning,
     accepted: colors.success,
     declined: colors.error,
-    ignored:  colors.textMuted,
+    ignored: colors.textMuted,
   };
 
   return (
@@ -98,10 +98,10 @@ function OfferCard({
 
 function LogOfferForm({ shiftId, onSaved }: { shiftId: string; onSaved: () => void }) {
   const [visible, setVisible] = useState(false);
-  const [payout, setPayout]   = useState('');
-  const [dist, setDist]       = useState('');
-  const [time, setTime]       = useState('');
-  const [pickupZip, setPickupZip]   = useState('');
+  const [payout, setPayout] = useState('');
+  const [dist, setDist] = useState('');
+  const [time, setTime] = useState('');
+  const [pickupZip, setPickupZip] = useState('');
   const [dropoffZip, setDropoffZip] = useState('');
 
   const queryClient = useQueryClient();
@@ -109,8 +109,11 @@ function LogOfferForm({ shiftId, onSaved }: { shiftId: string; onSaved: () => vo
     mutationFn: (input: RecordOfferInput) => recordOffer(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['offers', shiftId] });
-      setPayout(''); setDist(''); setTime('');
-      setPickupZip(''); setDropoffZip('');
+      setPayout('');
+      setDist('');
+      setTime('');
+      setPickupZip('');
+      setDropoffZip('');
       setVisible(false);
       onSaved();
     },
@@ -382,9 +385,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     alignItems: 'center',
   },
-  acceptBtn:  { backgroundColor: colors.success },
+  acceptBtn: { backgroundColor: colors.success },
   declineBtn: { backgroundColor: colors.error },
-  disabled:   { opacity: 0.5 },
+  disabled: { opacity: 0.5 },
   actionBtnText: {
     color: '#fff',
     fontWeight: typography.fontWeightSemibold,
@@ -431,7 +434,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     backgroundColor: colors.background,
   },
-  inputHalf:  { flex: 1 },
+  inputHalf: { flex: 1 },
   inputThird: { flex: 1 },
   formActions: {
     flexDirection: 'row',

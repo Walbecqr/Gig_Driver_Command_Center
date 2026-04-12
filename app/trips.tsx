@@ -31,7 +31,7 @@ import type { Trip, Stop } from '@/types/entities';
 
 function StopRow({ stop }: { stop: Stop }) {
   const typeColor: Record<Stop['type'], string> = {
-    pickup:  colors.doordash,
+    pickup: colors.doordash,
     dropoff: colors.success,
     waypoint: colors.info,
   };
@@ -40,11 +40,11 @@ function StopRow({ stop }: { stop: Stop }) {
     <View style={styles.stopRow}>
       <View style={[styles.stopDot, { backgroundColor: typeColor[stop.type] }]} />
       <View style={{ flex: 1 }}>
-        <Text style={styles.stopType}>{stop.type.toUpperCase()} #{stop.sequence}</Text>
+        <Text style={styles.stopType}>
+          {stop.type.toUpperCase()} #{stop.sequence}
+        </Text>
         <Text style={styles.stopAddress}>{stop.address}</Text>
-        {stop.zoneId ? (
-          <Text style={styles.zoneTag}>{stop.zoneId.slice(0, 10)}…</Text>
-        ) : null}
+        {stop.zoneId ? <Text style={styles.zoneTag}>{stop.zoneId.slice(0, 10)}…</Text> : null}
       </View>
     </View>
   );
@@ -64,10 +64,10 @@ function ActiveTripPanel({
   onComplete: () => void;
 }) {
   const [addingStop, setAddingStop] = useState(false);
-  const [stopType, setStopType]     = useState<Stop['type']>('pickup');
-  const [address, setAddress]       = useState('');
-  const [lat, setLat]               = useState('');
-  const [lng, setLng]               = useState('');
+  const [stopType, setStopType] = useState<Stop['type']>('pickup');
+  const [address, setAddress] = useState('');
+  const [lat, setLat] = useState('');
+  const [lng, setLng] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -80,7 +80,9 @@ function ActiveTripPanel({
     mutationFn: (input: AddStopInput) => addStop(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stops', trip.id] });
-      setAddress(''); setLat(''); setLng('');
+      setAddress('');
+      setLat('');
+      setLng('');
       setAddingStop(false);
     },
     onError: () => Alert.alert('Error', 'Could not add stop.'),
@@ -121,7 +123,8 @@ function ActiveTripPanel({
       </View>
 
       <Text style={styles.tripMeta}>
-        Started {new Date(trip.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        Started{' '}
+        {new Date(trip.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         {' · '}
         {stops.length} stop{stops.length !== 1 ? 's' : ''}
       </Text>
@@ -129,7 +132,9 @@ function ActiveTripPanel({
       {/* Stop list */}
       {stops.length > 0 && (
         <View style={styles.stopList}>
-          {stops.map((s) => <StopRow key={s.id} stop={s} />)}
+          {stops.map((s) => (
+            <StopRow key={s.id} stop={s} />
+          ))}
         </View>
       )}
 
@@ -177,8 +182,11 @@ function ActiveTripPanel({
 
           <View style={styles.formRow}>
             <TouchableOpacity
-              style={[styles.actionBtn, styles.primaryBtn,
-                      addStopMutation.isPending && styles.disabled]}
+              style={[
+                styles.actionBtn,
+                styles.primaryBtn,
+                addStopMutation.isPending && styles.disabled,
+              ]}
               disabled={addStopMutation.isPending}
               onPress={handleAddStop}
             >
@@ -207,8 +215,11 @@ function ActiveTripPanel({
 
       {/* Complete trip */}
       <TouchableOpacity
-        style={[styles.actionBtn, styles.completeBtn,
-                completeMutation.isPending && styles.disabled]}
+        style={[
+          styles.actionBtn,
+          styles.completeBtn,
+          completeMutation.isPending && styles.disabled,
+        ]}
         disabled={completeMutation.isPending}
         onPress={() =>
           Alert.alert('Complete trip?', 'This will end the current trip.', [
@@ -233,10 +244,8 @@ function ActiveTripPanel({
 
 function CompletedTripRow({ trip }: { trip: Trip }) {
   const start = new Date(trip.startTime);
-  const end   = trip.endTime ? new Date(trip.endTime) : null;
-  const durationMin = end
-    ? Math.round((end.getTime() - start.getTime()) / 60_000)
-    : null;
+  const end = trip.endTime ? new Date(trip.endTime) : null;
+  const durationMin = end ? Math.round((end.getTime() - start.getTime()) / 60_000) : null;
 
   return (
     <View style={styles.completedRow}>
@@ -244,9 +253,7 @@ function CompletedTripRow({ trip }: { trip: Trip }) {
         {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         {end ? ` → ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
       </Text>
-      {durationMin != null && (
-        <Text style={styles.completedDuration}>{durationMin} min</Text>
-      )}
+      {durationMin != null && <Text style={styles.completedDuration}>{durationMin} min</Text>}
       {trip.primaryPickupZoneId && (
         <Text style={styles.zoneTag}>{trip.primaryPickupZoneId.slice(0, 10)}…</Text>
       )}
@@ -302,15 +309,15 @@ export default function TripsScreen() {
       {loadingActive ? (
         <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.lg }} />
       ) : activeTrip ? (
-        <ActiveTripPanel
-          trip={activeTrip}
-          shiftId={activeShift.id}
-          onComplete={() => {}}
-        />
+        <ActiveTripPanel trip={activeTrip} shiftId={activeShift.id} onComplete={() => {}} />
       ) : (
         <TouchableOpacity
-          style={[styles.actionBtn, styles.primaryBtn, { marginBottom: spacing.md },
-                  startMutation.isPending && styles.disabled]}
+          style={[
+            styles.actionBtn,
+            styles.primaryBtn,
+            { marginBottom: spacing.md },
+            startMutation.isPending && styles.disabled,
+          ]}
           disabled={startMutation.isPending}
           onPress={() => startMutation.mutate()}
         >
@@ -464,7 +471,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  primaryBtn:  { backgroundColor: colors.primary },
+  primaryBtn: { backgroundColor: colors.primary },
   completeBtn: { backgroundColor: colors.success },
   ghostBtn: {
     borderWidth: 1,

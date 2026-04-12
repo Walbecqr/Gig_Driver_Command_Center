@@ -61,9 +61,7 @@ export async function startTrip(shiftId: string): Promise<Trip> {
  */
 export async function addStop(input: AddStopInput): Promise<Stop> {
   const zoneId =
-    input.lat != null && input.lng != null
-      ? getZoneId(input.lat, input.lng)
-      : undefined;
+    input.lat != null && input.lng != null ? getZoneId(input.lat, input.lng) : undefined;
 
   const stop: Stop = {
     id: generateId(),
@@ -88,12 +86,12 @@ export async function addStop(input: AddStopInput): Promise<Stop> {
 export async function completeTrip(tripId: string): Promise<void> {
   const stops = await getStopsForTrip(tripId);
 
-  const pickupStop  = stops.find((s) => s.type === 'pickup')  ?? stops[0];
+  const pickupStop = stops.find((s) => s.type === 'pickup') ?? stops[0];
   const dropoffStop = stops.findLast((s) => s.type === 'dropoff') ?? stops[stops.length - 1];
 
   await updateTrip(tripId, {
     endTime: new Date().toISOString(),
-    primaryPickupZoneId:  pickupStop?.zoneId,
+    primaryPickupZoneId: pickupStop?.zoneId,
     primaryDropoffZoneId: dropoffStop?.zoneId,
   });
 }

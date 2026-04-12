@@ -23,10 +23,7 @@ export async function getTripsForShift(shiftId: string): Promise<Trip[]> {
 }
 
 export async function getTripById(id: string): Promise<Trip | null> {
-  const rows = await querySql<Trip>(
-    `SELECT ${TRIP_COLS} FROM trips WHERE id = ?;`,
-    [id],
-  );
+  const rows = await querySql<Trip>(`SELECT ${TRIP_COLS} FROM trips WHERE id = ?;`, [id]);
   return rows[0] ?? null;
 }
 
@@ -50,7 +47,9 @@ export async function insertTrip(trip: Trip): Promise<void> {
 
 export async function updateTrip(
   id: string,
-  patch: Partial<Pick<Trip, 'endTime' | 'routeJson' | 'primaryPickupZoneId' | 'primaryDropoffZoneId'>>,
+  patch: Partial<
+    Pick<Trip, 'endTime' | 'routeJson' | 'primaryPickupZoneId' | 'primaryDropoffZoneId'>
+  >,
 ): Promise<void> {
   const sets: string[] = [];
   const params: (string | null)[] = [];
@@ -77,10 +76,7 @@ export async function updateTrip(
   sets.push("updated_at = datetime('now')");
   params.push(id);
 
-  await runSql(
-    `UPDATE trips SET ${sets.join(', ')} WHERE id = ?;`,
-    params,
-  );
+  await runSql(`UPDATE trips SET ${sets.join(', ')} WHERE id = ?;`, params);
 }
 
 // ---------------------------------------------------------------------------
@@ -97,23 +93,15 @@ const STOP_COLS = `
 `;
 
 export async function getStopsForTrip(tripId: string): Promise<Stop[]> {
-  return querySql<Stop>(
-    `SELECT ${STOP_COLS} FROM stops WHERE trip_id = ? ORDER BY sequence ASC;`,
-    [tripId],
-  );
+  return querySql<Stop>(`SELECT ${STOP_COLS} FROM stops WHERE trip_id = ? ORDER BY sequence ASC;`, [
+    tripId,
+  ]);
 }
 
 export async function insertStop(stop: Stop): Promise<void> {
   await runSql(
     `INSERT INTO stops (id, trip_id, stop_type, address, sequence, zone_id, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, datetime('now'));`,
-    [
-      stop.id,
-      stop.tripId,
-      stop.type,
-      stop.address,
-      stop.sequence,
-      stop.zoneId ?? null,
-    ],
+    [stop.id, stop.tripId, stop.type, stop.address, stop.sequence, stop.zoneId ?? null],
   );
 }
