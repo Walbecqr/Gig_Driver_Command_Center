@@ -13,12 +13,14 @@
 
 import { getZoneId, getNeighborZones, getZoneCenter, getZoneResolution } from '../src/utils/h3';
 
+const TIMES_SQUARE_LATLNG: readonly [number, number] = [40.7580, -73.9855];
+
 // ---------------------------------------------------------------------------
 // 1. Basic H3 conversion
 // ---------------------------------------------------------------------------
 
 const TEST_COORDS: Array<{ label: string; lat: number; lng: number }> = [
-  { label: 'Times Square, NYC',       lat: 40.7580,  lng: -73.9855 },
+  { label: 'Times Square, NYC',       lat: TIMES_SQUARE_LATLNG[0],  lng: TIMES_SQUARE_LATLNG[1] },
   { label: 'Wrigley Field, Chicago',  lat: 41.9484,  lng: -87.6553 },
   { label: 'Downtown LA',             lat: 34.0522,  lng: -118.2437 },
   { label: 'Miami Beach',             lat: 25.7907,  lng: -80.1300 },
@@ -41,7 +43,7 @@ for (const coord of TEST_COORDS) {
 
 console.log('=== 2. getNeighborZones() — ring sizes ===\n');
 
-const pivot = getZoneId(40.7580, -73.9855); // Times Square
+const pivot = getZoneId(...TIMES_SQUARE_LATLNG); // Times Square
 
 for (const k of [0, 1, 2]) {
   const neighbors = getNeighborZones(pivot, k);
@@ -82,7 +84,7 @@ if (allPassed) {
 
 console.log('=== 4. Example zone_time_series queries ===\n');
 
-const exampleZone = getZoneId(40.7580, -73.9855);
+const exampleZone = getZoneId(...TIMES_SQUARE_LATLNG);
 
 console.log('-- SQLite (local): hourly metrics for a zone over 24 h');
 console.log(`SELECT

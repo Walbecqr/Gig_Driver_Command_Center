@@ -29,7 +29,9 @@
       "Bash(npm audit:*)",
       "Bash(npx tsx:*)",
       "Bash(supabase migration:*)",
-      "Bash(supabase db:*)"
+      "Bash(supabase db:dump)",
+      "Bash(supabase db:restore)",
+      "Bash(supabase db:push)"
     ]
   }
 }
