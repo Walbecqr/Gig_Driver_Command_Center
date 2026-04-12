@@ -13,7 +13,7 @@
  * fast zone-grouping queries without a JOIN.
  */
 
-import { supabaseClient as supabase } from '@/services/supabase/client';
+import { getSupabaseClientOrThrow } from '@/services/supabase/utils';
 import { getZoneId } from '@/utils/h3';
 import type { Json } from '@/types/supabase.generated';
 import {
@@ -34,6 +34,7 @@ export async function ingestDeliveryOrders(
   batch: ImportBatchInput,
   rows: DeliveryOrderRow[],
 ): Promise<string> {
+  const supabase = getSupabaseClientOrThrow('[deliveryOrders] Supabase client is not configured');
   const importBatchId = await createImportBatch(batch, 'synthetic', 'simulation', rows.length);
   let parsedCount = 0;
 

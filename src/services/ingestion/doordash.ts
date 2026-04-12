@@ -19,17 +19,16 @@
  */
 
 import { getZoneId } from '@/utils/h3';
-import { supabaseClient, isSupabaseConfigured } from '@/services/supabase/client';
+import { getSupabaseClientOrThrow } from '@/services/supabase/utils';
 import type { Json, Database } from '@/types/supabase.generated';
 
 type SourceTypeEnum = Database['public']['Enums']['source_type_enum'];
 
 /** Asserts Supabase is configured and returns the typed client. */
 function requireSupabase() {
-  if (!isSupabaseConfigured || !supabaseClient) {
-    throw new Error('[doordash] Supabase is not configured. Cannot perform ingestion.');
-  }
-  return supabaseClient;
+  return getSupabaseClientOrThrow(
+    '[doordash] Supabase is not configured. Cannot perform ingestion.',
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -155,7 +154,9 @@ export async function ingestDoorDashEarnings(
     });
 
     if (finError) {
-      console.warn('[doordash] trip_financials insert failed:', finError.message, { tripId: trip.trip_id });
+      console.warn('[doordash] trip_financials insert failed:', finError.message, {
+        tripId: trip.trip_id,
+      });
       continue;
     }
 
@@ -168,7 +169,9 @@ export async function ingestDoorDashEarnings(
     });
 
     if (metricsError) {
-      console.warn('[doordash] trip_metrics insert failed:', metricsError.message, { tripId: trip.trip_id });
+      console.warn('[doordash] trip_metrics insert failed:', metricsError.message, {
+        tripId: trip.trip_id,
+      });
       continue;
     }
 
@@ -258,8 +261,12 @@ export async function ingestDoorDashOrders(
       const { error: metricsError } = await supabase
         .from('trip_metrics')
         .upsert(
-          { trip_id: tripId, duration_minutes: row.durationMinutes,
-            distance_source: 'derived', duration_source: 'statement' },
+          {
+            trip_id: tripId,
+            duration_minutes: row.durationMinutes,
+            distance_source: 'derived',
+            duration_source: 'statement',
+          },
           { onConflict: 'trip_id' },
         );
 

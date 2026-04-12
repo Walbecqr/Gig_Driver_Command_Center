@@ -5,10 +5,10 @@
  * simpleHash dedup utility used by all Kaggle ingestion services.
  */
 
-import { supabaseClient as supabase } from '@/services/supabase/client';
+import { getSupabaseClientOrThrow } from '@/services/supabase/utils';
 import type { Database } from '@/types/supabase.generated';
 
-type PlatformEnum   = Database['public']['Enums']['platform_enum'];
+type PlatformEnum = Database['public']['Enums']['platform_enum'];
 type SourceTypeEnum = Database['public']['Enums']['source_type_enum'];
 
 export interface ImportBatchInput {
@@ -33,6 +33,7 @@ export async function createImportBatch(
   sourceType: SourceTypeEnum,
   rowCountRaw: number,
 ): Promise<string> {
+  const supabase = getSupabaseClientOrThrow('[ingestionUtils] Supabase client is not configured');
   const { data, error } = await supabase
     .from('import_batches')
     .insert({
@@ -61,6 +62,7 @@ export async function finaliseImportBatch(
   total: number,
   parsed: number,
 ): Promise<void> {
+  const supabase = getSupabaseClientOrThrow('[ingestionUtils] Supabase client is not configured');
   const status = parsed === 0 ? 'failed' : parsed < total ? 'partial' : 'completed';
   await supabase
     .from('import_batches')

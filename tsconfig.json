@@ -1,6 +1,7 @@
 {
   "extends": "./node_modules/expo/tsconfig.base",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "target": "ES2020",
     "module": "ESNext",
     "jsx": "react-jsx",
@@ -10,6 +11,7 @@
     "strictPropertyInitialization": true,
     "strictFunctionTypes": true,
     "moduleResolution": "bundler",
+    "baseUrl": ".",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
