@@ -32,6 +32,9 @@
       "Bash(supabase db:dump)",
       "Bash(supabase db:restore)",
       "Bash(supabase db:push)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Walbe\\.claude\\projects\\c--Users-Walbe-Gig-Driver-Command-Center"
     ]
   }
 }
