@@ -209,7 +209,7 @@ describe('computeBalance', () => {
 describe('addLedgerEntry', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('stores absolute value of amount regardless of sign passed in', async () => {
+  it('normalises deposit/withdrawal amounts to positive', async () => {
     const { insertLedgerEntry } = await import('@/db/repositories/cashRepository');
     vi.mocked(insertLedgerEntry).mockResolvedValue(undefined);
 
@@ -218,6 +218,24 @@ describe('addLedgerEntry', () => {
     expect(result.amount).toBe(25);
     expect(result.type).toBe('withdrawal');
     expect(result.userId).toBe('u1');
+  });
+
+  it('preserves negative sign for adjustment entries', async () => {
+    const { insertLedgerEntry } = await import('@/db/repositories/cashRepository');
+    vi.mocked(insertLedgerEntry).mockResolvedValue(undefined);
+
+    const result = await addLedgerEntry({ userId: 'u1', type: 'adjustment', amount: -10 });
+
+    expect(result.amount).toBe(-10);
+  });
+
+  it('preserves positive sign for adjustment entries', async () => {
+    const { insertLedgerEntry } = await import('@/db/repositories/cashRepository');
+    vi.mocked(insertLedgerEntry).mockResolvedValue(undefined);
+
+    const result = await addLedgerEntry({ userId: 'u1', type: 'adjustment', amount: 15 });
+
+    expect(result.amount).toBe(15);
   });
 });
 
