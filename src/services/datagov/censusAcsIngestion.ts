@@ -15,6 +15,7 @@
  */
 
 import { supabaseClient as supabase } from '@/services/supabase/client';
+import { assertKnownZoneMetricKey, getZoneMetricDefinition } from '@/lib/zone-metrics/registry';
 import { getZoneId } from '@/utils/h3';
 import type { Json } from '@/types/supabase.generated';
 import {
@@ -113,6 +114,8 @@ export async function ingestCensusAcs(
       if (metric.metricValueNumeric == null && metric.metricValueText == null) {
         continue;
       }
+      assertKnownZoneMetricKey(metric.metricKey);
+      const metricDefinition = getZoneMetricDefinition(metric.metricKey);
 
       const { error: demoError } = await supabase
         .from('zone_demographics')
@@ -126,7 +129,7 @@ export async function ingestCensusAcs(
           metric_key:           metric.metricKey,
           metric_value_numeric: metric.metricValueNumeric,
           metric_value_text:    metric.metricValueText,
-          units:                metric.units,
+          units:                metricDefinition.units,
           source_vintage:       row.vintage,
           source_confidence:    0.95,
         });
