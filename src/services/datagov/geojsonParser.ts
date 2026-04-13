@@ -153,7 +153,12 @@ export interface ParsedGeoJsonFeature {
 
 // ----------------------------------------------------------------
 // Centroid helpers
-// ----------------------------------------------------------------
+/**
+ * Derives latitude and longitude from a GeoJSON Point coordinate array.
+ *
+ * @param coords - Coordinate array where index 0 is longitude and index 1 is latitude.
+ * @returns An object with `lat` and `lng` set to the numeric latitude/longitude, or `null` when the coordinate is missing or not a finite number.
+ */
 
 function centroidFromPoint(coords: unknown): { lat: number | null; lng: number | null } {
   if (!Array.isArray(coords) || coords.length < 2) return { lat: null, lng: null };
@@ -165,6 +170,12 @@ function centroidFromPoint(coords: unknown): { lat: number | null; lng: number |
   };
 }
 
+/**
+ * Compute the centroid of a polygon using the midpoint of the first ring's bounding box.
+ *
+ * @param coords - Polygon coordinates where the first element is the linear ring (an array of [lng, lat] points)
+ * @returns The centroid as `{ lat, lng }`; `lat` or `lng` is `null` if no finite coordinate could be determined
+ */
 function centroidFromPolygon(coords: unknown): { lat: number | null; lng: number | null } {
   // Take first ring; compute bounding-box midpoint
   if (!Array.isArray(coords) || !Array.isArray(coords[0])) return { lat: null, lng: null };
@@ -184,12 +195,24 @@ function centroidFromPolygon(coords: unknown): { lat: number | null; lng: number
   };
 }
 
+/**
+ * Compute a centroid for a GeoJSON MultiPolygon by using the first polygon's coordinates.
+ *
+ * @param coords - GeoJSON MultiPolygon coordinates (an array of polygons, where each polygon is an array of linear rings). If `coords` is not a valid MultiPolygon coordinate array, the function returns `null` values.
+ * @returns An object with `lat` and `lng`: the computed centroid latitude and longitude, or `null` for each if a valid numeric value cannot be determined.
+ */
 function centroidFromMultiPolygon(coords: unknown): { lat: number | null; lng: number | null } {
   // Use first polygon's first ring
   if (!Array.isArray(coords) || !Array.isArray(coords[0])) return { lat: null, lng: null };
   return centroidFromPolygon(coords[0]);
 }
 
+/**
+ * Computes a centroid for a LineString geometry by using the midpoint coordinate.
+ *
+ * @param coords - LineString coordinates (an array of position arrays such as `[lng, lat, ...]`); any value may be passed.
+ * @returns The centroid `lat` and `lng` values when a valid midpoint position is present, or `null` for each when `coords` is not a valid non-empty array or no finite coordinate values are available.
+ */
 function centroidFromLineString(coords: unknown): { lat: number | null; lng: number | null } {
   // Use midpoint of the coordinate array
   if (!Array.isArray(coords) || coords.length === 0) return { lat: null, lng: null };
@@ -197,6 +220,17 @@ function centroidFromLineString(coords: unknown): { lat: number | null; lng: num
   return centroidFromPoint(mid);
 }
 
+/**
+ * Compute a centroid for a GeoJSON geometry, with optional override from feature properties.
+ *
+ * If `properties.centroid_lat` and `properties.centroid_lng` are numeric, those values are returned.
+ * Otherwise, computes a centroid for supported geometry types: `Point`, `Polygon`, `MultiPolygon`, `LineString`,
+ * and `MultiLineString` (using the first linestring). For unsupported or missing geometries, returns null coordinates.
+ *
+ * @param geometry - The GeoJSON geometry to derive a centroid from, or `null`/`undefined`.
+ * @param properties - Feature properties; numeric `centroid_lat` and `centroid_lng` (if present) override the computed centroid.
+ * @returns An object with `lat` and `lng` set to a number when available, or `null` when a centroid cannot be determined.
+ */
 function computeCentroid(
   geometry: GeoJsonGeometry | null | undefined,
   properties: Record<string, unknown>,
@@ -226,7 +260,12 @@ function computeCentroid(
 
 // ----------------------------------------------------------------
 // Geometry type normalizer
-// ----------------------------------------------------------------
+/**
+ * Normalize a GeoJSON geometry type string to a standard lowercase value.
+ *
+ * @param rawType - The raw geometry type (may be `undefined` or use any casing)
+ * @returns The normalized geometry type: `point`, `polygon`, `multipolygon`, `linestring`, `multilinestring`, or `unknown`
+ */
 
 function normalizeGeometryType(rawType: string | undefined): string {
   switch (rawType?.toLowerCase()) {

@@ -54,44 +54,10 @@ export interface CensusAcsRow {
 
 /** Maps Census variable codes to (metricKey, units) pairs. */
 const VARIABLE_MAP: Record<string, { key: string; units: string | null }> = {
-  // Population
-  B01001_001E:  { key: 'total_population',          units: 'persons' },
-  B01002_001E:  { key: 'median_age',                units: 'years'   },
-
-  // Household income
-  B19013_001E:  { key: 'median_household_income',   units: 'usd'     },
-  B19301_001E:  { key: 'per_capita_income',         units: 'usd'     },
-
-  // Poverty
-  B17001_002E:  { key: 'population_below_poverty',  units: 'persons' },
-  B17001_001E:  { key: 'population_poverty_universe', units: 'persons' },
-
-  // Housing
-  B25001_001E:  { key: 'total_housing_units',       units: 'units'   },
-  B25002_002E:  { key: 'occupied_housing_units',    units: 'units'   },
-  B25064_001E:  { key: 'median_gross_rent',         units: 'usd'     },
-  B25077_001E:  { key: 'median_home_value',         units: 'usd'     },
-
-  // Transportation (commute mode)
-  B08301_001E:  { key: 'workers_16_plus',           units: 'persons' },
-  B08301_002E:  { key: 'commute_drove_alone',       units: 'persons' },
-  B08301_010E:  { key: 'commute_transit',           units: 'persons' },
-  B08301_018E:  { key: 'commute_bicycle',           units: 'persons' },
-  B08301_019E:  { key: 'commute_walk',              units: 'persons' },
-  B08301_021E:  { key: 'commute_worked_home',       units: 'persons' },
-
-  // Education
-  B15003_001E:  { key: 'population_25_plus',        units: 'persons' },
-  B15003_022E:  { key: 'bachelors_degree',          units: 'persons' },
-  B15003_023E:  { key: 'masters_degree',            units: 'persons' },
-
-  // Race / ethnicity (for equity analysis, not scoring)
-  B02001_002E:  { key: 'race_white_alone',          units: 'persons' },
-  B03002_012E:  { key: 'hispanic_or_latino',        units: 'persons' },
-
-  // Vehicles available (delivery relevance)
-  B08201_001E:  { key: 'households_total',          units: 'households' },
-  B08201_002E:  { key: 'households_no_vehicle',     units: 'households' },
+  B01003_001E: { key: CENSUS_METRIC_KEYS.POPULATION_COUNT, units: 'people' },
+  B19013_001E: { key: CENSUS_METRIC_KEYS.MEDIAN_HOUSEHOLD_INCOME, units: 'usd' },
+  B08303_001E: { key: CENSUS_METRIC_KEYS.WORKER_COUNT, units: 'workers' },
+  B08134_001E: { key: CENSUS_METRIC_KEYS.MEAN_COMMUTE_MINUTES, units: 'minutes' },
 };
 
 // ----------------------------------------------------------------
@@ -99,10 +65,11 @@ const VARIABLE_MAP: Record<string, { key: string; units: string | null }> = {
 // ----------------------------------------------------------------
 
 /**
- * Parse Census API "array-of-arrays" response.
+ * Parses a Census API "array-of-arrays" response into normalized CensusAcsRow entries.
  *
- * @param data  The raw JSON array from the Census API (header row + data rows).
- * @param vintage  Source vintage label, e.g. "ACS 2022 5-year".
+ * @param data - Array where the first element is a header row and subsequent elements are data rows as returned by the Census API.
+ * @param vintage - Optional source vintage label (for example, "ACS 2022 5-year").
+ * @returns A list of parsed Census rows (one per data row). Returns an empty array when `data` is not an array or has fewer than two rows.
  */
 export function parseCensusAcsArrayFormat(
   data: string[][],
@@ -172,13 +139,13 @@ export function parseCensusAcsArrayFormat(
 // ----------------------------------------------------------------
 
 /**
- * Parse a Census-derived file that has already been pivoted to an array of
- * objects.  Each object must have a 'geoid' field; all other numeric fields
- * are mapped through VARIABLE_MAP.  Unknown fields are stored as-is in
- * rawRecord.
+ * Convert an array of pivoted Census ACS records into normalized CensusAcsRow entries.
  *
- * @param data     Array of plain objects.
- * @param vintage  Source vintage label.
+ * Returns an empty array when given a non-array input.
+ *
+ * @param data - Array of plain objects whose keys may include Census variable codes (case-insensitive); unknown keys are preserved in each row's `rawRecord`.
+ * @param vintage - Optional source vintage label to attach to each output row; `null` if omitted.
+ * @returns An array of CensusAcsRow objects containing parsed `geoid`, `name`, optional centroid coordinates, mapped `metrics`, and the original `rawRecord`.
  */
 export function parseCensusAcsObjectFormat(
   data: Record<string, unknown>[],
@@ -232,3 +199,4 @@ export function parseCensusAcsObjectFormat(
     };
   });
 }
+import { CENSUS_METRIC_KEYS } from '@/lib/zone-metrics/census-metric-keys';
