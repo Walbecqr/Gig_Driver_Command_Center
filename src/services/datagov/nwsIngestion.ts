@@ -53,13 +53,11 @@ const H3_RESOLUTION = 9;
 // ----------------------------------------------------------------
 
 /**
- * Ingest parsed NWS observation rows into Supabase.
+ * Ingest parsed NWS observation rows into the reference dataset and create a reference ingest batch.
  *
- * For each observation:
- *   1. Upsert a reference_features row (geometry + raw properties).
- *   2. Insert one external_conditions row per condition type (EAV).
+ * For each observation this creates a reference_features row (point geometry and raw properties) and inserts an aggregated external_conditions snapshot if required geometry and timestamps are present.
  *
- * @returns The reference_ingest_batch_id created for this run.
+ * @returns The `reference_ingest_batch_id` created for this ingestion run.
  */
 export async function ingestNwsObservations(
   rows: NwsObservationRow[],
@@ -150,13 +148,9 @@ export async function ingestNwsObservations(
 // ----------------------------------------------------------------
 
 /**
- * Ingest parsed NWS alert rows into Supabase.
+ * Persist parsed NWS alert rows into the reference and alert tables in Supabase.
  *
- * For each alert:
- *   1. Insert a reference_features row (geometry + raw properties).
- *   2. Insert one external_condition_alerts row.
- *
- * @returns The reference_ingest_batch_id created for this run.
+ * @returns The `reference_ingest_batch_id` created for this run.
  */
 export async function ingestNwsAlerts(
   rows: NwsAlertRow[],

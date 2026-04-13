@@ -4,7 +4,11 @@ import { isSupabaseConfigured, supabaseClient } from '@/services/supabase/client
 import type { Database } from '@/types/supabase.generated';
 
 /**
- * Returns the configured Supabase client or throws with the provided context message.
+ * Get the configured Supabase client, throwing an error if the client is not available.
+ *
+ * @param errorMessage - Error message to use when the Supabase client is not configured (defaults to 'Supabase client is not configured')
+ * @returns The configured `SupabaseClient<Database>` instance
+ * @throws Error if Supabase is not configured or the client is not present; the thrown error's message is `errorMessage`
  */
 export function getSupabaseClientOrThrow(
   errorMessage = 'Supabase client is not configured',

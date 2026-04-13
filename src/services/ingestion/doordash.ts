@@ -24,7 +24,12 @@ import type { Json, Database } from '@/types/supabase.generated';
 
 type SourceTypeEnum = Database['public']['Enums']['source_type_enum'];
 
-/** Asserts Supabase is configured and returns the typed client. */
+/**
+ * Obtain the configured Supabase client for DoorDash ingestion or throw an error.
+ *
+ * @returns The typed Supabase client.
+ * @throws If Supabase is not configured.
+ */
 function requireSupabase() {
   return getSupabaseClientOrThrow(
     '[doordash] Supabase is not configured. Cannot perform ingestion.',
@@ -84,13 +89,7 @@ export interface ImportBatchInput {
 // ---------------------------------------------------------------------------
 
 /**
- * Ingest a parsed DoorDash Earnings CSV into Supabase.
- *
- * Steps:
- *  1. Create an import_batch record.
- *  2. Upsert each row as a raw_import_record.
- *  3. Map each row to a `trips` + `trip_financials` + `trip_metrics` record.
- *  4. Mark the batch as completed (or partial on partial failure).
+ * Ingests DoorDash earnings rows into the system by recording raw rows and creating corresponding trips with their financials and metrics.
  *
  * @returns The created import_batch_id.
  */
@@ -183,14 +182,9 @@ export async function ingestDoorDashEarnings(
 }
 
 /**
- * Ingest a parsed DoorDash Orders CSV into Supabase.
+ * Ingest parsed DoorDash Orders CSV rows into Supabase, creating an import batch and creating or enriching trips with stops, optional duration metrics, and zone backfills.
  *
- * Enriches existing trip records with stop data (lat/lng → H3 zone_id) and
- * updates trip timing. Call AFTER ingestDoorDashEarnings so trip_id rows
- * already exist to link against, OR pass standalone if earnings data is
- * unavailable.
- *
- * @returns The created import_batch_id.
+ * @returns The `import_batch_id` of the created import batch.
  */
 export async function ingestDoorDashOrders(
   batch: ImportBatchInput,

@@ -121,7 +121,19 @@ export async function ingestGeoJsonFeatures(
 
 // ----------------------------------------------------------------
 // Domain table router
-// ----------------------------------------------------------------
+/**
+ * Route a parsed GeoJSON feature into its configured domain overlay table and insert the corresponding row.
+ *
+ * Inserts a single domain-specific overlay record that references `referenceFeatureId` and `referenceDatasetId`,
+ * includes the provided `h3Cell`/resolution and stores raw feature properties. The exact target table and
+ * inserted columns are determined by the feature's `profile.targetTable`.
+ *
+ * @param feat - The parsed GeoJSON feature and its ingestion profile used to determine target table and values
+ * @param referenceFeatureId - The `reference_features` row id to use as a foreign key
+ * @param referenceDatasetId - The reference dataset id to use as a foreign key
+ * @param h3Cell - H3 cell id at the configured resolution (empty string if unavailable)
+ * @returns `true` if a domain-row insert was performed without error; `false` if the insert failed or the target table is unrecognized.
+ */
 
 async function insertDomainRow(
   feat: ParsedGeoJsonFeature,
