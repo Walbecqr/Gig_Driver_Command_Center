@@ -1,4 +1,5 @@
 import { REFERENCE_METRIC_KEYS } from '@/lib/zone-metrics/reference-metric-keys';
+import { geoJsonMultiPolygonToZoneIds, geoJsonPolygonToZoneIds } from '@/utils/h3';
 
 /**
  * Generic GeoJSON parser for data.gov reference datasets.
@@ -141,6 +142,8 @@ export interface ParsedGeoJsonFeature {
   geometryJson: GeoJsonGeometry | null;
   centroidLat: number | null;
   centroidLng: number | null;
+  /** H3 tessellation of polygon/multipolygon geometries at resolution 9. */
+  polygonZoneIds: string[];
   /** Primary numeric metric value (e.g. crash count, travel time index). */
   metricValueNumeric: number | null;
   /** Primary text classification (e.g. flood zone code). */
@@ -298,6 +301,12 @@ export function parseGeoJsonFeatureCollection(
   return featureCollection.features.map((feature) => {
     const props = feature.properties ?? {};
     const centroid = computeCentroid(feature.geometry ?? null, props);
+    const polygonZoneIds =
+      feature.geometry?.type === 'Polygon'
+        ? geoJsonPolygonToZoneIds(feature.geometry.coordinates)
+        : feature.geometry?.type === 'MultiPolygon'
+          ? geoJsonMultiPolygonToZoneIds(feature.geometry.coordinates)
+          : [];
 
     // External ID
     const featureExternalId =
@@ -358,6 +367,7 @@ export function parseGeoJsonFeatureCollection(
       geometryJson:  feature.geometry ?? null,
       centroidLat:   centroid.lat,
       centroidLng:   centroid.lng,
+      polygonZoneIds,
       metricValueNumeric,
       metricValueText,
       profile,

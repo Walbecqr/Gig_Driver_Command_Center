@@ -19,8 +19,9 @@
  * H3 resolutions:
  *   - reference_features: h3_res6, h3_res7, h3_res8 (all three stored).
  *   - domain tables: zone_id at res 9 (default H3 resolution).
- *   - When centroid is null, zone_id is stored as '' — callers can filter or
- *     handle via a separate tessellation pass.
+ *   - Polygon and MultiPolygon features are tessellated to one row per H3 cell
+ *     in zone-oriented tables; point flows keep centroid behavior.
+ *   - When no polygon tessellation or centroid exists, zone_id is stored as ''.
  */
 
 import { getSupabaseClientOrThrow } from '../supabase/utils';
@@ -35,6 +36,13 @@ import {
 import type { ParsedGeoJsonFeature } from './geojsonParser';
 
 const H3_RESOLUTION = 9;
+const POLYGON_AWARE_TABLES = new Set([
+  'zone_risk_layers',
+  'zone_transport_layers',
+  'zone_reference_layers',
+  'zone_demand_drivers',
+  'zone_land_use_layers',
+] as const);
 
 // ----------------------------------------------------------------
 // Main ingestion entry point
@@ -98,21 +106,30 @@ export async function ingestGeoJsonFeatures(
 
     if (refError || !refFeat) continue;
 
-    const zoneId =
+    const centroidZoneId =
       feat.centroidLat != null && feat.centroidLng != null
         ? getZoneId(feat.centroidLat, feat.centroidLng, H3_RESOLUTION)
         : '';
 
-    // 2. Route to the appropriate domain table
-    const didInsert = await insertDomainRow(
-      feat,
-      refFeat.reference_feature_id,
-      referenceDatasetId,
-      zoneId,
-      supabase,
-    );
+    const zoneIds =
+      POLYGON_AWARE_TABLES.has(feat.profile.targetTable) && feat.polygonZoneIds.length > 0
+        ? feat.polygonZoneIds
+        : [centroidZoneId];
 
-    if (didInsert) parsedCount++;
+    // 2. Route to the appropriate domain table
+    let insertedRows = 0;
+    for (const zoneId of zoneIds) {
+      const didInsert = await insertDomainRow(
+        feat,
+        refFeat.reference_feature_id,
+        referenceDatasetId,
+        zoneId,
+        supabase,
+      );
+      if (didInsert) insertedRows++;
+    }
+
+    if (insertedRows > 0) parsedCount++;
   }
 
   await finaliseReferenceIngestBatch(batchId, features.length, parsedCount);

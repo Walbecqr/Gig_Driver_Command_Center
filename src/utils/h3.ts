@@ -79,5 +79,73 @@ export function polygonToZoneIds(
   holes: [number, number][][] = [],
   resolution = DEFAULT_RESOLUTION,
 ): string[] {
-  return polygonToCells({ outer: outerRing, holes }, resolution);
+  return polygonToCells([outerRing, ...holes], resolution, false);
+}
+
+type LngLatPosition = [number, number];
+type GeoJsonPolygonCoordinates = LngLatPosition[][];
+type GeoJsonMultiPolygonCoordinates = LngLatPosition[][][];
+
+function isLngLatPosition(value: unknown): value is LngLatPosition {
+  if (!Array.isArray(value) || value.length < 2) return false;
+  const lng = Number(value[0]);
+  const lat = Number(value[1]);
+  return Number.isFinite(lat) && Number.isFinite(lng);
+}
+
+function toLatLngRing(ring: unknown): [number, number][] {
+  if (!Array.isArray(ring)) return [];
+  const points: [number, number][] = [];
+  for (const candidate of ring) {
+    if (!isLngLatPosition(candidate)) continue;
+    const [lng, lat] = candidate;
+    points.push([lat, lng]);
+  }
+
+  if (points.length < 3) return [];
+
+  const [firstLat, firstLng] = points[0];
+  const [lastLat, lastLng] = points[points.length - 1];
+  if (firstLat === lastLat && firstLng === lastLng) {
+    return points.slice(0, -1);
+  }
+
+  return points;
+}
+
+function uniqueZoneIds(zoneIds: string[]): string[] {
+  return [...new Set(zoneIds)];
+}
+
+export function geoJsonPolygonToZoneIds(
+  coordinates: GeoJsonPolygonCoordinates | unknown,
+  resolution = DEFAULT_RESOLUTION,
+): string[] {
+  if (!Array.isArray(coordinates) || coordinates.length === 0) return [];
+
+  const outerRing = toLatLngRing(coordinates[0]);
+  if (outerRing.length < 3) return [];
+
+  const holes: [number, number][][] = [];
+  for (const holeRing of coordinates.slice(1)) {
+    const hole = toLatLngRing(holeRing);
+    if (hole.length >= 3) holes.push(hole);
+  }
+
+  return polygonToZoneIds(outerRing, holes, resolution);
+}
+
+export function geoJsonMultiPolygonToZoneIds(
+  coordinates: GeoJsonMultiPolygonCoordinates | unknown,
+  resolution = DEFAULT_RESOLUTION,
+): string[] {
+  if (!Array.isArray(coordinates)) return [];
+  const zoneIds: string[] = [];
+
+  for (const polygon of coordinates) {
+    const polygonZoneIds = geoJsonPolygonToZoneIds(polygon, resolution);
+    zoneIds.push(...polygonZoneIds);
+  }
+
+  return uniqueZoneIds(zoneIds);
 }
