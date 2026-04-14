@@ -1,9 +1,8 @@
 /**
  * Shared CSV tokenizer and field-coercion utilities.
  *
- * All Kaggle dataset parsers import from here instead of duplicating the
- * RFC-4180 tokenizer. doordashParser.ts keeps its own copy for backwards
- * compatibility and is not changed.
+ * All ingestion parsers should import from here instead of duplicating
+ * RFC-4180 tokenization and coercion helpers.
  *
  * No external dependencies.
  */
