@@ -11,7 +11,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import ScreenShell from '@/components/ScreenShell';
 import { colors, spacing, typography, radius } from '@/lib/tokens';
-import { getMarketSummary, type ZoneInsight } from '@/features/market';
+import {
+  getMarketSummary,
+  getReferenceContextSummary,
+  type ReferenceContextSummary,
+  type ZoneInsight,
+} from '@/features/market';
 
 // ---------------------------------------------------------------------------
 // Types for tab selection
@@ -117,6 +122,74 @@ function EmptyState({ tab }: { tab: Tab }) {
   );
 }
 
+function ContextCards({
+  context,
+  zoneCount,
+}: {
+  context: ReferenceContextSummary | undefined;
+  zoneCount: number;
+}) {
+  const weather = context?.weather;
+  const merchant = context?.merchantDensity;
+  const external = context?.externalZone;
+
+  return (
+    <View style={styles.contextSection}>
+      <Text style={styles.contextTitle}>Reference context</Text>
+      <Text style={styles.contextSubtitle}>
+        Snapshot from {zoneCount} top zone{zoneCount === 1 ? '' : 's'}.
+      </Text>
+
+      <View style={styles.contextCard}>
+        <Text style={styles.contextCardTitle}>Weather context</Text>
+        {weather ? (
+          <Text style={styles.contextBody}>
+            {weather.weatherCondition ?? 'Condition unavailable'}
+            {weather.temperatureF != null ? ` • ${weather.temperatureF.toFixed(1)}°F` : ''}
+            {weather.windSpeedMph != null ? ` • ${weather.windSpeedMph.toFixed(1)} mph wind` : ''}
+            {` • ${weather.activeAlerts} active alert${weather.activeAlerts === 1 ? '' : 's'}`}
+          </Text>
+        ) : (
+          <Text style={styles.contextBodyMuted}>
+            No weather reference data for these zones yet.
+          </Text>
+        )}
+      </View>
+
+      <View style={styles.contextCard}>
+        <Text style={styles.contextCardTitle}>Merchant density</Text>
+        {merchant ? (
+          <Text style={styles.contextBody}>
+            {merchant.merchantCount} merchant{merchant.merchantCount === 1 ? '' : 's'}
+            {merchant.avgRating != null ? ` • avg rating ${merchant.avgRating.toFixed(2)}` : ''}
+            {merchant.dominantPlatform ? ` • mostly ${merchant.dominantPlatform}` : ''}
+          </Text>
+        ) : (
+          <Text style={styles.contextBodyMuted}>
+            Merchant reference data is unavailable in this environment.
+          </Text>
+        )}
+      </View>
+
+      <View style={styles.contextCard}>
+        <Text style={styles.contextCardTitle}>External zone context</Text>
+        {external ? (
+          <Text style={styles.contextBody}>
+            {external.referenceBoundaryCount} boundary overlays
+            {external.topBoundaryType ? ` • top type ${external.topBoundaryType}` : ''}
+            {` • ${external.demandDriverCount} demand drivers`}
+            {external.topDemandDriverType ? ` • top driver ${external.topDemandDriverType}` : ''}
+          </Text>
+        ) : (
+          <Text style={styles.contextBodyMuted}>
+            No external zone overlays found for top zones.
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Screen
 // ---------------------------------------------------------------------------
@@ -143,6 +216,22 @@ export default function MarketScreen() {
   const windowStart = data?.windowStart
     ? new Date(data.windowStart).toLocaleDateString([], { month: 'short', day: 'numeric' })
     : null;
+  const contextZoneIds = data
+    ? Array.from(
+        new Set(
+          [...data.topEarning, ...data.highAcceptance, ...data.fastPickup]
+            .map((zone) => zone.zoneId)
+            .filter(Boolean),
+        ),
+      ).slice(0, 5)
+    : [];
+
+  const { data: context } = useQuery({
+    queryKey: ['market-reference-context', contextZoneIds],
+    queryFn: () => getReferenceContextSummary(contextZoneIds),
+    enabled: contextZoneIds.length > 0,
+    staleTime: 1000 * 60 * 10,
+  });
 
   return (
     <ScreenShell title="Market Intel" subtitle="Zone performance from your driving history">
@@ -179,6 +268,10 @@ export default function MarketScreen() {
           {data.totalZones} zone{data.totalZones !== 1 ? 's' : ''} with data
           {windowStart ? ` since ${windowStart}` : ''}
         </Text>
+      )}
+
+      {data && data.totalZones > 0 && (
+        <ContextCards context={context} zoneCount={contextZoneIds.length} />
       )}
 
       {/* Tab bar */}
@@ -258,6 +351,43 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSizeXs,
     color: colors.textMuted,
     marginBottom: spacing.sm,
+  },
+  contextSection: {
+    marginBottom: spacing.md,
+    gap: spacing.xs,
+  },
+  contextTitle: {
+    fontSize: typography.fontSizeSm,
+    fontWeight: typography.fontWeightSemibold,
+    color: colors.textPrimary,
+  },
+  contextSubtitle: {
+    fontSize: typography.fontSizeXs,
+    color: colors.textMuted,
+  },
+  contextCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    gap: spacing.xs,
+  },
+  contextCardTitle: {
+    fontSize: typography.fontSizeSm,
+    color: colors.textSecondary,
+    fontWeight: typography.fontWeightSemibold,
+  },
+  contextBody: {
+    fontSize: typography.fontSizeSm,
+    color: colors.textPrimary,
+    lineHeight: 20,
+  },
+  contextBodyMuted: {
+    fontSize: typography.fontSizeSm,
+    color: colors.textMuted,
+    lineHeight: 20,
   },
 
   // Tab bar
