@@ -1,3 +1,5 @@
+import { CENSUS_METRIC_KEYS, type CensusMetricKey } from '@/lib/zone-metrics/census-metric-keys';
+
 /**
  * Census ACS (American Community Survey) JSON parser.
  *
@@ -26,7 +28,7 @@
 // ----------------------------------------------------------------
 
 export interface CensusAcsMetric {
-  metricKey: string;
+  metricKey: CensusMetricKey;
   metricValueNumeric: number | null;
   metricValueText: string | null;
   units: string | null;
@@ -53,7 +55,7 @@ export interface CensusAcsRow {
 // ----------------------------------------------------------------
 
 /** Maps Census variable codes to (metricKey, units) pairs. */
-const VARIABLE_MAP: Record<string, { key: string; units: string | null }> = {
+const VARIABLE_MAP: Record<string, { key: CensusMetricKey; units: string | null }> = {
   B01003_001E: { key: CENSUS_METRIC_KEYS.POPULATION_COUNT, units: 'people' },
   B19013_001E: { key: CENSUS_METRIC_KEYS.MEDIAN_HOUSEHOLD_INCOME, units: 'usd' },
   B08303_001E: { key: CENSUS_METRIC_KEYS.WORKER_COUNT, units: 'workers' },
@@ -199,4 +201,3 @@ export function parseCensusAcsObjectFormat(
     };
   });
 }
-import { CENSUS_METRIC_KEYS } from '@/lib/zone-metrics/census-metric-keys';

@@ -1,7 +1,10 @@
 import { CENSUS_METRIC_KEYS, type CensusMetricKey } from './census-metric-keys';
+import { REFERENCE_METRIC_KEYS, type ReferenceMetricKey } from './reference-metric-keys';
 import type { ZoneMetricDefinition } from './types';
 
-export const ZONE_METRIC_REGISTRY: Record<CensusMetricKey, ZoneMetricDefinition> = {
+export type ZoneMetricKey = CensusMetricKey | ReferenceMetricKey;
+
+export const ZONE_METRIC_REGISTRY: Record<ZoneMetricKey, ZoneMetricDefinition> = {
   [CENSUS_METRIC_KEYS.POPULATION_COUNT]: {
     metricKey: CENSUS_METRIC_KEYS.POPULATION_COUNT,
     metricLabel: 'Population Count',
@@ -422,20 +425,81 @@ export const ZONE_METRIC_REGISTRY: Record<CensusMetricKey, ZoneMetricDefinition>
     sourcePriority: 40,
     description: 'Optional confidence modifier for sparse or rural markets based on broadband access.',
   },
+
+  [REFERENCE_METRIC_KEYS.BOUNDARY]: {
+    metricKey: REFERENCE_METRIC_KEYS.BOUNDARY,
+    metricLabel: 'Administrative Boundary',
+    metricCategory: 'reference',
+    metricFamily: 'boundary',
+    valueType: 'text',
+    units: null,
+    sourceScope: 'geojson_file',
+    defaultH3Resolution: null,
+    preferredBoundaryType: null,
+    isDerived: false,
+    isActive: true,
+    sourcePriority: 10,
+    description: 'Canonical reference boundary marker used for TIGER and other administrative geometry overlays.',
+  },
+  [REFERENCE_METRIC_KEYS.FLOOD_ZONE]: {
+    metricKey: REFERENCE_METRIC_KEYS.FLOOD_ZONE,
+    metricLabel: 'Flood Zone',
+    metricCategory: 'risk',
+    metricFamily: 'hazard',
+    valueType: 'text',
+    units: 'zone_code',
+    sourceScope: 'geojson_file',
+    defaultH3Resolution: 9,
+    preferredBoundaryType: null,
+    isDerived: false,
+    isActive: true,
+    sourcePriority: 15,
+    description: 'FEMA flood hazard zone classification used for weather and routing risk overlays.',
+  },
+  [REFERENCE_METRIC_KEYS.CRASH_COUNT]: {
+    metricKey: REFERENCE_METRIC_KEYS.CRASH_COUNT,
+    metricLabel: 'Crash Count',
+    metricCategory: 'risk',
+    metricFamily: 'safety',
+    valueType: 'count',
+    units: 'fatalities',
+    sourceScope: 'datagov_api',
+    defaultH3Resolution: 9,
+    preferredBoundaryType: null,
+    isDerived: false,
+    isActive: true,
+    sourcePriority: 15,
+    description: 'Aggregated crash/fatality count proxy used for roadway safety scoring overlays.',
+  },
+  [REFERENCE_METRIC_KEYS.TRAVEL_TIME_INDEX]: {
+    metricKey: REFERENCE_METRIC_KEYS.TRAVEL_TIME_INDEX,
+    metricLabel: 'Travel Time Index',
+    metricCategory: 'transport',
+    metricFamily: 'network',
+    valueType: 'index',
+    units: 'index',
+    sourceScope: 'datagov_api',
+    defaultH3Resolution: 9,
+    preferredBoundaryType: null,
+    isDerived: false,
+    isActive: true,
+    sourcePriority: 15,
+    description: 'FHWA travel-time reliability index used for traffic congestion and route-friction overlays.',
+  },
 };
 
-export function isKnownZoneMetricKey(value: string): value is CensusMetricKey {
+export function isKnownZoneMetricKey(value: string): value is ZoneMetricKey {
   return value in ZONE_METRIC_REGISTRY;
 }
 
-export function assertKnownZoneMetricKey(value: string): asserts value is CensusMetricKey {
+export function assertKnownZoneMetricKey(value: string): asserts value is ZoneMetricKey {
   if (!isKnownZoneMetricKey(value)) {
     throw new Error(`Unknown zone metric key: ${value}`);
   }
 }
 
 export function getZoneMetricDefinition(metricKey: string): ZoneMetricDefinition {
-  const definition = ZONE_METRIC_REGISTRY[metricKey as CensusMetricKey];
+  const definition = ZONE_METRIC_REGISTRY[metricKey as ZoneMetricKey];
   if (!definition) {
     throw new Error(`Missing zone metric definition for key: ${metricKey}`);
   }

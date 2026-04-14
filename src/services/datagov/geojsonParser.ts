@@ -1,3 +1,5 @@
+import { REFERENCE_METRIC_KEYS } from '@/lib/zone-metrics/reference-metric-keys';
+
 /**
  * Generic GeoJSON parser for data.gov reference datasets.
  *
@@ -372,7 +374,7 @@ export function parseGeoJsonFeatureCollection(
 /** Pre-built profile for FEMA National Flood Hazard Layer. */
 export const FEMA_FLOOD_PROFILE: GeojsonIngestProfile = {
   targetTable:        'zone_risk_layers',
-  primaryMetricKey:   'flood_zone',
+  primaryMetricKey:   REFERENCE_METRIC_KEYS.FLOOD_ZONE,
   textPropertyName:   'FLD_ZONE',
   valuePropertyName:  'STATIC_BFE',
   units:              'zone_code',
@@ -389,7 +391,7 @@ export const FEMA_FLOOD_PROFILE: GeojsonIngestProfile = {
 /** Pre-built profile for NHTSA crash data aggregated by road segment. */
 export const NHTSA_CRASH_PROFILE: GeojsonIngestProfile = {
   targetTable:       'zone_risk_layers',
-  primaryMetricKey:  'crash_count',
+  primaryMetricKey:  REFERENCE_METRIC_KEYS.CRASH_COUNT,
   valuePropertyName: 'FATALS',
   units:             'fatalities',
   externalIdPropertyName: 'ST_CASE',
@@ -408,7 +410,7 @@ export const NHTSA_CRASH_PROFILE: GeojsonIngestProfile = {
 /** Pre-built profile for FHWA travel-time reliability data. */
 export const FHWA_TRAVEL_TIME_PROFILE: GeojsonIngestProfile = {
   targetTable:       'zone_transport_layers',
-  primaryMetricKey:  'travel_time_index',
+  primaryMetricKey:  REFERENCE_METRIC_KEYS.TRAVEL_TIME_INDEX,
   valuePropertyName: 'TTI',
   units:             'index',
   externalIdPropertyName: 'TMC',
