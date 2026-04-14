@@ -2,6 +2,12 @@
 
 Ordered migration set for Postgres/Supabase.
 
+> [!WARNING]
+> Deprecated prototype only. These files are retained for historical context,
+> but they are superseded by `supabase/migrations/20260329000001_csv_import_schema.sql`
+> (the tracked migration used by the project). Do not apply this folder directly
+> in new environments unless you are intentionally reproducing prototype history.
+
 ## Execution order
 
 1. `001_extensions.sql`
