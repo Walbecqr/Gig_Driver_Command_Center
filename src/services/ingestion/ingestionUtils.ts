@@ -56,7 +56,17 @@ export async function createImportBatch(
   return data.import_batch_id;
 }
 
-/** Mark an import_batch as completed / partial / failed based on parse counts. */
+/**
+ * Set an import batch's status and parsed row count based on the number of parsed rows.
+ *
+ * Updates the `import_batches` row identified by `importBatchId` with `row_count_parsed`
+ * and an `import_status` determined as: `failed` when `parsed` is 0, `partial` when
+ * `parsed` is less than `total`, and `completed` otherwise.
+ *
+ * @param importBatchId - The `import_batch_id` of the batch to update
+ * @param total - The expected total number of rows in the import
+ * @param parsed - The number of rows that were successfully parsed
+ */
 export async function finaliseImportBatch(
   importBatchId: string,
   total: number,

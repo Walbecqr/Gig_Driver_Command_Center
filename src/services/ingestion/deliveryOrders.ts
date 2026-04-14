@@ -27,8 +27,11 @@ import type { DeliveryOrderRow } from './deliveryOrdersParser';
 export type { ImportBatchInput };
 
 /**
- * Ingest a parsed Delivery Orders simulation CSV into Supabase.
- * @returns The created import_batch_id.
+ * Ingests parsed delivery order rows into Supabase, creating an import batch and corresponding raw records, trips, financials, metrics, and optional stops, then finalizes the import.
+ *
+ * @param batch - Import batch metadata (used for user and platform account associations)
+ * @param rows - Parsed `DeliveryOrderRow` records from a simulation CSV
+ * @returns The created `import_batch_id`
  */
 export async function ingestDeliveryOrders(
   batch: ImportBatchInput,

@@ -92,20 +92,43 @@ export interface NwsAlertRow {
 
 // ----------------------------------------------------------------
 // Unit conversion helpers
-// ----------------------------------------------------------------
+/**
+ * Convert temperature from degrees Celsius to degrees Fahrenheit.
+ *
+ * @param c - Temperature in degrees Celsius
+ * @returns Temperature in degrees Fahrenheit
+ */
 
 function cToF(c: number): number {
   return (c * 9) / 5 + 32;
 }
 
+/**
+ * Convert a speed from kilometers per hour to miles per hour.
+ *
+ * @param kmh - Speed in kilometers per hour
+ * @returns Speed in miles per hour
+ */
 function kmhToMph(kmh: number): number {
   return kmh * 0.621371;
 }
 
+/**
+ * Convert a distance in meters to miles.
+ *
+ * @param m - Distance in meters
+ * @returns The equivalent distance in miles
+ */
 function mToMiles(m: number): number {
   return m / 1609.344;
 }
 
+/**
+ * Convert pressure from pascals to hectopascals.
+ *
+ * @param pa - Pressure value in pascals
+ * @returns The equivalent pressure in hectopascals
+ */
 function paToHpa(pa: number): number {
   return pa / 100;
 }
@@ -114,7 +137,12 @@ function paToHpa(pa: number): number {
 // NWS quantity extraction
 // ----------------------------------------------------------------
 
-/** Extract a numeric value from a NWS quantity object like { value: 20, unitCode: 'wmoUnit:degC' }. */
+/**
+ * Extracts the numeric `value` from an NWS quantity object.
+ *
+ * @param obj - An object that may contain a `value` property (for example `{ value, unitCode }`)
+ * @returns `number` if `obj.value` can be coerced to a finite number, `null` otherwise
+ */
 function nwsValue(obj: unknown): number | null {
   if (obj == null || typeof obj !== 'object') return null;
   const v = (obj as Record<string, unknown>).value;
@@ -123,7 +151,15 @@ function nwsValue(obj: unknown): number | null {
   return isFinite(n) ? n : null;
 }
 
-/** Extract a unit code string, stripping the 'wmoUnit:' prefix if present. */
+/**
+ * Extracts a unit code from an object and removes known prefixes.
+ *
+ * Reads the `unitCode` property (if present and a string) and strips a leading
+ * `wmoUnit:` or `unit:` prefix before returning the remainder.
+ *
+ * @param obj - Object that may contain a `unitCode` property
+ * @returns The unit code with any leading `wmoUnit:` or `unit:` prefix removed, or `null` if not present or not a string
+ */
 function nwsUnit(obj: unknown): string | null {
   if (obj == null || typeof obj !== 'object') return null;
   const u = (obj as Record<string, unknown>).unitCode;
@@ -133,7 +169,12 @@ function nwsUnit(obj: unknown): string | null {
 
 // ----------------------------------------------------------------
 // Geometry helpers
-// ----------------------------------------------------------------
+/**
+ * Extracts latitude and longitude from a GeoJSON Point geometry.
+ *
+ * @param geometry - A GeoJSON geometry object (may be `null` or non-Point) from an NWS feature
+ * @returns An object with `lat` and `lng` set to numbers when the geometry is a valid Point with finite coordinates, otherwise `null` for each missing/invalid coordinate
+ */
 
 function extractPoint(
   geometry: NwsFeature['geometry'],
@@ -154,11 +195,14 @@ function extractPoint(
 // ----------------------------------------------------------------
 
 /**
- * Parse a NWS observations FeatureCollection (from /observations/latest
- * or /stations/{stationId}/observations).
+ * Convert an NWS observations FeatureCollection into an array of observation rows.
  *
- * Returns one NwsObservationRow per feature.  Each row carries an array of
- * NwsConditionEntry objects — one per measurable quantity.
+ * Each output row corresponds to one feature and includes raw feature properties,
+ * centroid coordinates, station metadata, and an EAV-style `conditions` array
+ * with converted numeric values or text descriptions where available.
+ *
+ * @param featureCollection - GeoJSON FeatureCollection from an NWS observations endpoint
+ * @returns An array of `NwsObservationRow`, one entry per feature in `featureCollection`
  */
 export function parseNwsObservations(
   featureCollection: NwsFeatureCollection,
@@ -282,9 +326,11 @@ export function parseNwsObservations(
 // ----------------------------------------------------------------
 
 /**
- * Parse a NWS alerts FeatureCollection (from /alerts or /alerts/active).
+ * Parses an NWS alerts FeatureCollection into an array of alert rows.
  *
- * Returns one NwsAlertRow per feature.
+ * Produces one row per feature: extracts centroid coordinates, preserves the original `properties` as `rawProperties`, maps common alert metadata (severity, certainty, urgency, onset/expires/headline/description) to strings or `null` when absent, and uses `"unknown"` when the event type is missing or empty.
+ *
+ * @returns An array of alert rows, one entry per feature in the input collection.
  */
 export function parseNwsAlerts(
   featureCollection: NwsFeatureCollection,
