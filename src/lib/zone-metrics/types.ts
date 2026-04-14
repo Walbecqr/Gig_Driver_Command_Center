@@ -7,7 +7,10 @@ export type ZoneMetricCategory =
   | 'friction'
   | 'mobility'
   | 'demographic_profile'
-  | 'confidence';
+  | 'confidence'
+  | 'reference'
+  | 'risk'
+  | 'transport';
 
 export type ZoneMetricFamily =
   | 'population'
@@ -20,9 +23,13 @@ export type ZoneMetricFamily =
   | 'age'
   | 'education'
   | 'vehicle_availability'
-  | 'digital_access';
+  | 'digital_access'
+  | 'boundary'
+  | 'hazard'
+  | 'safety'
+  | 'network';
 
-export type ZoneMetricSourceScope = 'census_acs' | 'derived';
+export type ZoneMetricSourceScope = 'census_acs' | 'derived' | 'geojson_file' | 'datagov_api';
 
 export interface ZoneMetricDefinition {
   metricKey: string;
