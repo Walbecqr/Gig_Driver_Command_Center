@@ -7,11 +7,11 @@
  *
  * H3 cells at resolutions 6, 7, 8 are computed from the centroid and stored
  * on the reference_feature; resolution 9 is used for the zone_demographics
- * h3_cell column so it aligns with the rest of the zone-scoring pipeline.
+ * zone_id column so it aligns with the rest of the zone-scoring pipeline.
  *
  * When the row has no centroid coordinates (common for county-level data),
- * h3_cell is null and the boundary_type / boundary_external_id fields on
- * zone_demographics carry the GEOID for manual H3 tessellation later.
+ * zone_id is empty string and the boundary_type / boundary_external_id fields
+ * on zone_demographics carry the GEOID for manual H3 tessellation later.
  */
 
 import { supabaseClient as supabase } from '@/services/supabase/client';
@@ -121,8 +121,7 @@ export async function ingestCensusAcs(
           reference_dataset_id: referenceDatasetId,
           boundary_type:        'census_geoid',
           boundary_external_id: row.geoid,
-          h3_resolution:        H3_RESOLUTION,
-          h3_cell:              h3Cell ?? '',   // empty string when no centroid — filtered by app layer
+          zone_id:              h3Cell ?? '',   // empty string when no centroid — filtered by app layer
           metric_key:           metric.metricKey,
           metric_value_numeric: metric.metricValueNumeric,
           metric_value_text:    metric.metricValueText,
