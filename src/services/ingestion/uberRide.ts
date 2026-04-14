@@ -18,8 +18,9 @@ import type { Json } from '@/types/supabase.generated';
 import {
   type ImportBatchInput,
   createImportBatch,
-  finaliseImportBatch,
+  linkTripToImportBatch,
   simpleHash,
+  submitImportBatchForReview,
 } from './ingestionUtils';
 import type { UberRideRow } from './uberRideParser';
 
@@ -99,6 +100,12 @@ export async function ingestUberRides(
       .single();
 
     if (tripError || !trip) continue;
+    await linkTripToImportBatch({
+      tripId: trip.trip_id,
+      importBatchId,
+      sourceType: 'kaggle_csv',
+      rawRecordId: rawRecord.raw_record_id,
+    });
 
     // Derive surge_amount from gross × (surge - 1) when multiplier is available
     const surgeAmount =
@@ -126,6 +133,6 @@ export async function ingestUberRides(
     parsedCount++;
   }
 
-  await finaliseImportBatch(importBatchId, rows.length, parsedCount);
+  await submitImportBatchForReview(importBatchId, rows.length, parsedCount);
   return importBatchId;
 }

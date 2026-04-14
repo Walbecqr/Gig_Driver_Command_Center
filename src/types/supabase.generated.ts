@@ -1791,7 +1791,7 @@ export type Database = {
       connection_mode_enum: 'import_only' | 'linked' | 'manual';
       connection_status_enum: 'active' | 'disconnected' | 'errored' | 'unknown';
       financial_source_type_enum: 'statement_csv' | 'personal_data_export' | 'derived';
-      import_status_enum: 'processing' | 'completed' | 'partial' | 'failed';
+      import_status_enum: 'processing' | 'review_pending' | 'completed' | 'partial' | 'failed';
       inference_method_enum: 'gap_clustering' | 'manual_merge' | 'manual_entry' | 'app_tracked';
       issue_type_enum:
         | 'duplicate'
@@ -1972,7 +1972,7 @@ export const Constants = {
       connection_mode_enum: ['import_only', 'linked', 'manual'],
       connection_status_enum: ['active', 'disconnected', 'errored', 'unknown'],
       financial_source_type_enum: ['statement_csv', 'personal_data_export', 'derived'],
-      import_status_enum: ['processing', 'completed', 'partial', 'failed'],
+      import_status_enum: ['processing', 'review_pending', 'completed', 'partial', 'failed'],
       inference_method_enum: ['gap_clustering', 'manual_merge', 'manual_entry', 'app_tracked'],
       issue_type_enum: [
         'duplicate',

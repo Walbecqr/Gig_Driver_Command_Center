@@ -19,8 +19,9 @@ import type { Json } from '@/types/supabase.generated';
 import {
   type ImportBatchInput,
   createImportBatch,
-  finaliseImportBatch,
+  linkTripToImportBatch,
   simpleHash,
+  submitImportBatchForReview,
 } from './ingestionUtils';
 import type { DeliveryOrderRow } from './deliveryOrdersParser';
 
@@ -89,6 +90,12 @@ export async function ingestDeliveryOrders(
       .single();
 
     if (tripError || !trip) continue;
+    await linkTripToImportBatch({
+      tripId: trip.trip_id,
+      importBatchId,
+      sourceType: 'simulation',
+      rawRecordId: rawRecord.raw_record_id,
+    });
 
     await supabase.from('trip_financials').insert({
       trip_id: trip.trip_id,
@@ -134,6 +141,6 @@ export async function ingestDeliveryOrders(
     parsedCount++;
   }
 
-  await finaliseImportBatch(importBatchId, rows.length, parsedCount);
+  await submitImportBatchForReview(importBatchId, rows.length, parsedCount);
   return importBatchId;
 }

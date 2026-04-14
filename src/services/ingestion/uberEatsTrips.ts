@@ -15,8 +15,9 @@ import type { Json } from '@/types/supabase.generated';
 import {
   type ImportBatchInput,
   createImportBatch,
-  finaliseImportBatch,
+  linkTripToImportBatch,
   simpleHash,
+  submitImportBatchForReview,
 } from './ingestionUtils';
 import type { UberEatsTripRow } from './uberEatsTripsParser';
 
@@ -72,6 +73,12 @@ export async function ingestUberEatsTrips(
       .single();
 
     if (tripError || !trip) continue;
+    await linkTripToImportBatch({
+      tripId: trip.trip_id,
+      importBatchId,
+      sourceType: 'kaggle_csv',
+      rawRecordId: rawRecord.raw_record_id,
+    });
 
     await supabase.from('trip_financials').insert({
       trip_id: trip.trip_id,
@@ -92,6 +99,6 @@ export async function ingestUberEatsTrips(
     parsedCount++;
   }
 
-  await finaliseImportBatch(importBatchId, rows.length, parsedCount);
+  await submitImportBatchForReview(importBatchId, rows.length, parsedCount);
   return importBatchId;
 }

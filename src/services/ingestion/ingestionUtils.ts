@@ -80,6 +80,63 @@ export async function finaliseImportBatch(
     .eq('import_batch_id', importBatchId);
 }
 
+/**
+ * Move an import batch into a reviewable staged state.
+ *
+ * This keeps canonical writes available for inspection, but prevents the batch
+ * from being considered finalized until an explicit approval action calls
+ * `finaliseImportBatch`.
+ */
+export async function submitImportBatchForReview(
+  importBatchId: string,
+  total: number,
+  parsed: number,
+): Promise<void> {
+  const supabase = getSupabaseClientOrThrow('[ingestionUtils] Supabase client is not configured');
+  const status = parsed === 0 ? 'failed' : 'review_pending';
+  await supabase
+    .from('import_batches')
+    .update({
+      import_status: status,
+      row_count_raw: total,
+      row_count_parsed: parsed,
+    })
+    .eq('import_batch_id', importBatchId);
+}
+
+/**
+ * Explicitly approve a previously staged import batch and finalize it.
+ */
+export async function approveImportBatch(importBatchId: string): Promise<void> {
+  const supabase = getSupabaseClientOrThrow('[ingestionUtils] Supabase client is not configured');
+  const { data, error } = await supabase
+    .from('import_batches')
+    .select('row_count_raw, row_count_parsed')
+    .eq('import_batch_id', importBatchId)
+    .single();
+
+  if (error || !data) throw new Error(`Failed to load import batch for approval: ${error?.message}`);
+  await finaliseImportBatch(importBatchId, data.row_count_raw ?? 0, data.row_count_parsed ?? 0);
+}
+
+/**
+ * Create traceability link between a canonical trip and its import source row.
+ */
+export async function linkTripToImportBatch(params: {
+  tripId: string;
+  importBatchId: string;
+  sourceType: SourceTypeEnum;
+  rawRecordId?: string;
+}): Promise<void> {
+  const supabase = getSupabaseClientOrThrow('[ingestionUtils] Supabase client is not configured');
+  await supabase.from('trip_source_links').insert({
+    trip_id: params.tripId,
+    import_batch_id: params.importBatchId,
+    raw_record_id: params.rawRecordId ?? null,
+    source_type: params.sourceType,
+  });
+}
+
 /** Cheap non-cryptographic hash for the row_hash dedup column. */
 export function simpleHash(str: string): string {
   let h = 0;
