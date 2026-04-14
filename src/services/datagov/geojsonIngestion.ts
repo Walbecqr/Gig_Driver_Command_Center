@@ -18,8 +18,8 @@
  *
  * H3 resolutions:
  *   - reference_features: h3_res6, h3_res7, h3_res8 (all three stored).
- *   - domain tables: h3_resolution=9, h3_cell at res 9.
- *   - When centroid is null, h3_cell is stored as '' — callers can filter or
+ *   - domain tables: zone_id at res 9 (default H3 resolution).
+ *   - When centroid is null, zone_id is stored as '' — callers can filter or
  *     handle via a separate tessellation pass.
  */
 
@@ -98,7 +98,7 @@ export async function ingestGeoJsonFeatures(
 
     if (refError || !refFeat) continue;
 
-    const h3Cell =
+    const zoneId =
       feat.centroidLat != null && feat.centroidLng != null
         ? getZoneId(feat.centroidLat, feat.centroidLng, H3_RESOLUTION)
         : '';
@@ -108,7 +108,7 @@ export async function ingestGeoJsonFeatures(
       feat,
       refFeat.reference_feature_id,
       referenceDatasetId,
-      h3Cell,
+      zoneId,
       supabase,
     );
 
@@ -139,7 +139,7 @@ async function insertDomainRow(
   feat: ParsedGeoJsonFeature,
   referenceFeatureId: string,
   referenceDatasetId: string,
-  h3Cell: string,
+  zoneId: string,
   supabase: ReturnType<typeof getSupabaseClientOrThrow>,
 ): Promise<boolean> {
   const profile = feat.profile;
@@ -147,11 +147,10 @@ async function insertDomainRow(
   switch (profile.targetTable) {
     // ── zone_risk_layers ─────────────────────────────────────────
     case 'zone_risk_layers': {
-      const { error } = await (supabase as any).from('zone_risk_layers').insert({
+      const { error } = await supabase.from('zone_risk_layers').insert({
         reference_feature_id: referenceFeatureId,
         reference_dataset_id: referenceDatasetId,
-        h3_resolution: H3_RESOLUTION,
-        h3_cell: h3Cell,
+        zone_id: zoneId,
         risk_type: profile.primaryMetricKey ?? 'unknown',
         risk_value_numeric: feat.metricValueNumeric,
         risk_value_text: feat.metricValueText,
@@ -164,11 +163,10 @@ async function insertDomainRow(
 
     // ── zone_transport_layers ────────────────────────────────────
     case 'zone_transport_layers': {
-      const { error } = await (supabase as any).from('zone_transport_layers').insert({
+      const { error } = await supabase.from('zone_transport_layers').insert({
         reference_feature_id: referenceFeatureId,
         reference_dataset_id: referenceDatasetId,
-        h3_resolution: H3_RESOLUTION,
-        h3_cell: h3Cell,
+        zone_id: zoneId,
         metric_key: profile.primaryMetricKey ?? 'unknown',
         metric_value_numeric: feat.metricValueNumeric,
         metric_value_text: feat.metricValueText,
@@ -181,11 +179,10 @@ async function insertDomainRow(
 
     // ── zone_reference_layers ────────────────────────────────────
     case 'zone_reference_layers': {
-      const { error } = await (supabase as any).from('zone_reference_layers').insert({
+      const { error } = await supabase.from('zone_reference_layers').insert({
         reference_feature_id: referenceFeatureId,
         reference_dataset_id: referenceDatasetId,
-        h3_resolution: H3_RESOLUTION,
-        h3_cell: h3Cell,
+        zone_id: zoneId,
         boundary_type: profile.primaryMetricKey ?? 'boundary',
         boundary_external_id: feat.featureExternalId,
         boundary_name: feat.featureName,
@@ -196,11 +193,10 @@ async function insertDomainRow(
 
     // ── zone_demand_drivers ──────────────────────────────────────
     case 'zone_demand_drivers': {
-      const { error } = await (supabase as any).from('zone_demand_drivers').insert({
+      const { error } = await supabase.from('zone_demand_drivers').insert({
         reference_feature_id: referenceFeatureId,
         reference_dataset_id: referenceDatasetId,
-        h3_resolution: H3_RESOLUTION,
-        h3_cell: h3Cell,
+        zone_id: zoneId,
         driver_type: profile.primaryMetricKey ?? feat.featureSubtype ?? 'unknown',
         driver_name: feat.featureName,
         driver_weight: feat.metricValueNumeric,
@@ -214,11 +210,10 @@ async function insertDomainRow(
 
     // ── poi_reference ────────────────────────────────────────────
     case 'poi_reference': {
-      const { error } = await (supabase as any).from('poi_reference').insert({
+      const { error } = await supabase.from('poi_reference').insert({
         reference_feature_id: referenceFeatureId,
         reference_dataset_id: referenceDatasetId,
-        h3_resolution: H3_RESOLUTION,
-        h3_cell: h3Cell,
+        zone_id: zoneId,
         poi_type: feat.featureSubtype ?? profile.primaryMetricKey ?? 'unknown',
         poi_name: feat.featureName,
         latitude: feat.centroidLat,
@@ -231,11 +226,10 @@ async function insertDomainRow(
 
     // ── zone_land_use_layers ─────────────────────────────────────
     case 'zone_land_use_layers': {
-      const { error } = await (supabase as any).from('zone_land_use_layers').insert({
+      const { error } = await supabase.from('zone_land_use_layers').insert({
         reference_feature_id: referenceFeatureId,
         reference_dataset_id: referenceDatasetId,
-        h3_resolution: H3_RESOLUTION,
-        h3_cell: h3Cell,
+        zone_id: zoneId,
         land_use_type: profile.primaryMetricKey ?? feat.featureSubtype ?? 'unknown',
         coverage_fraction: feat.metricValueNumeric,
         intensity_score: feat.metricValueText ? Number(feat.metricValueText) : null,
@@ -247,11 +241,10 @@ async function insertDomainRow(
 
     // ── infrastructure_reference ─────────────────────────────────
     case 'infrastructure_reference': {
-      const { error } = await (supabase as any).from('infrastructure_reference').insert({
+      const { error } = await supabase.from('infrastructure_reference').insert({
         reference_feature_id: referenceFeatureId,
         reference_dataset_id: referenceDatasetId,
-        h3_resolution: H3_RESOLUTION,
-        h3_cell: h3Cell,
+        zone_id: zoneId,
         infrastructure_type: feat.featureSubtype ?? profile.primaryMetricKey ?? 'unknown',
         infrastructure_name: feat.featureName,
         latitude: feat.centroidLat,

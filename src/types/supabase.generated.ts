@@ -72,8 +72,7 @@ export type Database = {
           event_type: string;
           expires_ts: string | null;
           external_condition_alert_id: string;
-          h3_cell: string;
-          h3_resolution: number;
+          zone_id: string;
           headline: string | null;
           onset_ts: string | null;
           properties_json: Json | null;
@@ -90,8 +89,7 @@ export type Database = {
           event_type: string;
           expires_ts?: string | null;
           external_condition_alert_id?: string;
-          h3_cell: string;
-          h3_resolution: number;
+          zone_id?: string;
           headline?: string | null;
           onset_ts?: string | null;
           properties_json?: Json | null;
@@ -108,8 +106,7 @@ export type Database = {
           event_type?: string;
           expires_ts?: string | null;
           external_condition_alert_id?: string;
-          h3_cell?: string;
-          h3_resolution?: number;
+          zone_id?: string;
           headline?: string | null;
           onset_ts?: string | null;
           properties_json?: Json | null;
@@ -1162,6 +1159,498 @@ export type Database = {
         };
         Relationships: [];
       };
+      zone_risk_layers: {
+        Row: {
+          zone_risk_layer_id: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id: string;
+          risk_type: string;
+          risk_value_numeric: number | null;
+          risk_value_text: string | null;
+          units: string | null;
+          source_confidence: number;
+          properties_json: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          zone_risk_layer_id?: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id?: string;
+          risk_type: string;
+          risk_value_numeric?: number | null;
+          risk_value_text?: string | null;
+          units?: string | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          zone_risk_layer_id?: string;
+          reference_feature_id?: string;
+          reference_dataset_id?: string;
+          zone_id?: string;
+          risk_type?: string;
+          risk_value_numeric?: number | null;
+          risk_value_text?: string | null;
+          units?: string | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'zone_risk_layers_reference_feature_id_fkey';
+            columns: ['reference_feature_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_features';
+            referencedColumns: ['reference_feature_id'];
+          },
+          {
+            foreignKeyName: 'zone_risk_layers_reference_dataset_id_fkey';
+            columns: ['reference_dataset_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_datasets';
+            referencedColumns: ['reference_dataset_id'];
+          },
+        ];
+      };
+      zone_transport_layers: {
+        Row: {
+          zone_transport_layer_id: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id: string;
+          metric_key: string;
+          metric_value_numeric: number | null;
+          metric_value_text: string | null;
+          units: string | null;
+          source_confidence: number;
+          properties_json: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          zone_transport_layer_id?: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id?: string;
+          metric_key: string;
+          metric_value_numeric?: number | null;
+          metric_value_text?: string | null;
+          units?: string | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          zone_transport_layer_id?: string;
+          reference_feature_id?: string;
+          reference_dataset_id?: string;
+          zone_id?: string;
+          metric_key?: string;
+          metric_value_numeric?: number | null;
+          metric_value_text?: string | null;
+          units?: string | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'zone_transport_layers_reference_feature_id_fkey';
+            columns: ['reference_feature_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_features';
+            referencedColumns: ['reference_feature_id'];
+          },
+          {
+            foreignKeyName: 'zone_transport_layers_reference_dataset_id_fkey';
+            columns: ['reference_dataset_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_datasets';
+            referencedColumns: ['reference_dataset_id'];
+          },
+        ];
+      };
+      zone_reference_layers: {
+        Row: {
+          zone_reference_layer_id: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id: string;
+          boundary_type: string;
+          boundary_external_id: string | null;
+          boundary_name: string | null;
+          properties_json: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          zone_reference_layer_id?: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id?: string;
+          boundary_type: string;
+          boundary_external_id?: string | null;
+          boundary_name?: string | null;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          zone_reference_layer_id?: string;
+          reference_feature_id?: string;
+          reference_dataset_id?: string;
+          zone_id?: string;
+          boundary_type?: string;
+          boundary_external_id?: string | null;
+          boundary_name?: string | null;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'zone_reference_layers_reference_feature_id_fkey';
+            columns: ['reference_feature_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_features';
+            referencedColumns: ['reference_feature_id'];
+          },
+          {
+            foreignKeyName: 'zone_reference_layers_reference_dataset_id_fkey';
+            columns: ['reference_dataset_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_datasets';
+            referencedColumns: ['reference_dataset_id'];
+          },
+        ];
+      };
+      zone_demand_drivers: {
+        Row: {
+          zone_demand_driver_id: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id: string;
+          driver_type: string;
+          driver_name: string | null;
+          driver_weight: number | null;
+          capacity_value: number | null;
+          units: string | null;
+          source_confidence: number;
+          properties_json: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          zone_demand_driver_id?: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id?: string;
+          driver_type: string;
+          driver_name?: string | null;
+          driver_weight?: number | null;
+          capacity_value?: number | null;
+          units?: string | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          zone_demand_driver_id?: string;
+          reference_feature_id?: string;
+          reference_dataset_id?: string;
+          zone_id?: string;
+          driver_type?: string;
+          driver_name?: string | null;
+          driver_weight?: number | null;
+          capacity_value?: number | null;
+          units?: string | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'zone_demand_drivers_reference_feature_id_fkey';
+            columns: ['reference_feature_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_features';
+            referencedColumns: ['reference_feature_id'];
+          },
+          {
+            foreignKeyName: 'zone_demand_drivers_reference_dataset_id_fkey';
+            columns: ['reference_dataset_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_datasets';
+            referencedColumns: ['reference_dataset_id'];
+          },
+        ];
+      };
+      poi_reference: {
+        Row: {
+          poi_reference_id: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id: string;
+          poi_type: string;
+          poi_name: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          source_confidence: number;
+          properties_json: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          poi_reference_id?: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id?: string;
+          poi_type: string;
+          poi_name?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          poi_reference_id?: string;
+          reference_feature_id?: string;
+          reference_dataset_id?: string;
+          zone_id?: string;
+          poi_type?: string;
+          poi_name?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'poi_reference_reference_feature_id_fkey';
+            columns: ['reference_feature_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_features';
+            referencedColumns: ['reference_feature_id'];
+          },
+          {
+            foreignKeyName: 'poi_reference_reference_dataset_id_fkey';
+            columns: ['reference_dataset_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_datasets';
+            referencedColumns: ['reference_dataset_id'];
+          },
+        ];
+      };
+      zone_land_use_layers: {
+        Row: {
+          zone_land_use_layer_id: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id: string;
+          land_use_type: string;
+          coverage_fraction: number | null;
+          intensity_score: number | null;
+          source_confidence: number;
+          properties_json: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          zone_land_use_layer_id?: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id?: string;
+          land_use_type: string;
+          coverage_fraction?: number | null;
+          intensity_score?: number | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          zone_land_use_layer_id?: string;
+          reference_feature_id?: string;
+          reference_dataset_id?: string;
+          zone_id?: string;
+          land_use_type?: string;
+          coverage_fraction?: number | null;
+          intensity_score?: number | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'zone_land_use_layers_reference_feature_id_fkey';
+            columns: ['reference_feature_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_features';
+            referencedColumns: ['reference_feature_id'];
+          },
+          {
+            foreignKeyName: 'zone_land_use_layers_reference_dataset_id_fkey';
+            columns: ['reference_dataset_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_datasets';
+            referencedColumns: ['reference_dataset_id'];
+          },
+        ];
+      };
+      infrastructure_reference: {
+        Row: {
+          infrastructure_reference_id: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id: string;
+          infrastructure_type: string;
+          infrastructure_name: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          source_confidence: number;
+          properties_json: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          infrastructure_reference_id?: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          zone_id?: string;
+          infrastructure_type: string;
+          infrastructure_name?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          infrastructure_reference_id?: string;
+          reference_feature_id?: string;
+          reference_dataset_id?: string;
+          zone_id?: string;
+          infrastructure_type?: string;
+          infrastructure_name?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          source_confidence?: number;
+          properties_json?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'infrastructure_reference_reference_feature_id_fkey';
+            columns: ['reference_feature_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_features';
+            referencedColumns: ['reference_feature_id'];
+          },
+          {
+            foreignKeyName: 'infrastructure_reference_reference_dataset_id_fkey';
+            columns: ['reference_dataset_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_datasets';
+            referencedColumns: ['reference_dataset_id'];
+          },
+        ];
+      };
+      zone_demographics: {
+        Row: {
+          zone_demographic_id: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          boundary_type: string;
+          boundary_external_id: string | null;
+          zone_id: string;
+          metric_key: string;
+          metric_value_numeric: number | null;
+          metric_value_text: string | null;
+          units: string | null;
+          source_vintage: string | null;
+          source_confidence: number;
+          created_at: string;
+        };
+        Insert: {
+          zone_demographic_id?: string;
+          reference_feature_id: string;
+          reference_dataset_id: string;
+          boundary_type?: string;
+          boundary_external_id?: string | null;
+          zone_id?: string;
+          metric_key: string;
+          metric_value_numeric?: number | null;
+          metric_value_text?: string | null;
+          units?: string | null;
+          source_vintage?: string | null;
+          source_confidence?: number;
+          created_at?: string;
+        };
+        Update: {
+          zone_demographic_id?: string;
+          reference_feature_id?: string;
+          reference_dataset_id?: string;
+          boundary_type?: string;
+          boundary_external_id?: string | null;
+          zone_id?: string;
+          metric_key?: string;
+          metric_value_numeric?: number | null;
+          metric_value_text?: string | null;
+          units?: string | null;
+          source_vintage?: string | null;
+          source_confidence?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'zone_demographics_reference_feature_id_fkey';
+            columns: ['reference_feature_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_features';
+            referencedColumns: ['reference_feature_id'];
+          },
+          {
+            foreignKeyName: 'zone_demographics_reference_dataset_id_fkey';
+            columns: ['reference_dataset_id'];
+            isOneToOne: false;
+            referencedRelation: 'reference_datasets';
+            referencedColumns: ['reference_dataset_id'];
+          },
+        ];
+      };
+      zone_metric_registry: {
+        Row: {
+          metric_key: string;
+          display_name: string;
+          description: string | null;
+          units: string | null;
+          layer_category: Database['public']['Enums']['reference_layer_category_enum'];
+          source_type: Database['public']['Enums']['reference_source_type_enum'] | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          metric_key: string;
+          display_name: string;
+          description?: string | null;
+          units?: string | null;
+          layer_category: Database['public']['Enums']['reference_layer_category_enum'];
+          source_type?: Database['public']['Enums']['reference_source_type_enum'] | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          metric_key?: string;
+          display_name?: string;
+          description?: string | null;
+          units?: string | null;
+          layer_category?: Database['public']['Enums']['reference_layer_category_enum'];
+          source_type?: Database['public']['Enums']['reference_source_type_enum'] | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       v_open_reconciliation_issues: {
@@ -1318,9 +1807,24 @@ export type Database = {
       parse_status_enum: 'parsed' | 'warning' | 'failed' | 'skipped';
       platform_enum: 'uber_driver' | 'uber_eats' | 'doordash' | 'grubhub' | 'unknown' | 'synthetic';
       platform_scope_enum: 'uber_only' | 'multi_platform' | 'unknown';
-      reference_layer_category_enum: string;
-      reference_source_type_enum: string;
-      refresh_cadence_enum: 'daily' | 'weekly' | 'monthly' | 'on_demand';
+      reference_layer_category_enum:
+        | 'external_conditions'
+        | 'external_alerts'
+        | 'demographics'
+        | 'risk'
+        | 'transport'
+        | 'reference'
+        | 'demand'
+        | 'poi'
+        | 'land_use'
+        | 'infrastructure';
+      reference_source_type_enum:
+        | 'nws'
+        | 'census_acs'
+        | 'geojson_file'
+        | 'data_gov_api'
+        | 'manual';
+      refresh_cadence_enum: 'daily' | 'weekly' | 'monthly' | 'on_demand' | 'annually';
       resolution_status_enum: 'open' | 'resolved' | 'ignored';
       service_type_enum: 'delivery' | 'rideshare' | 'unknown';
       severity_enum: 'low' | 'medium' | 'high';
@@ -1485,7 +1989,7 @@ export const Constants = {
       parse_status_enum: ['parsed', 'warning', 'failed', 'skipped'],
       platform_enum: ['uber_driver', 'uber_eats', 'doordash', 'grubhub', 'unknown', 'synthetic'],
       platform_scope_enum: ['uber_only', 'multi_platform', 'unknown'],
-      refresh_cadence_enum: ['daily', 'weekly', 'monthly', 'on_demand'],
+      refresh_cadence_enum: ['daily', 'weekly', 'monthly', 'on_demand', 'annually'],
       resolution_status_enum: ['open', 'resolved', 'ignored'],
       service_type_enum: ['delivery', 'rideshare', 'unknown'],
       severity_enum: ['low', 'medium', 'high'],

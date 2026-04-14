@@ -33,7 +33,9 @@
       "Bash(supabase db:restore)",
       "Bash(supabase db:push)",
       "Bash(supabase status:*)",
-      "Bash(supabase db:*)"
+      "Bash(supabase db:*)",
+      "Bash(grep -n \"^      [a-z_]*: {$\" /c/Users/Walbe/Gig_Driver_Command_Center/src/types/supabase.generated.ts)",
+      "Bash(npm run:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\Walbe\\.claude\\projects\\c--Users-Walbe-Gig-Driver-Command-Center"

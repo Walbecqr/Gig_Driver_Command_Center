@@ -200,12 +200,12 @@ export async function ingestNwsAlerts(
     if (featureError || !feature) continue;
 
     // H3 cell at res 9
-    const h3Cell =
+    const zoneId =
       row.centroidLat != null && row.centroidLng != null
         ? getZoneId(row.centroidLat, row.centroidLng, H3_RESOLUTION)
         : null;
 
-    if (!h3Cell) continue;
+    if (!zoneId) continue;
 
     // 2. Insert external_condition_alert row
     const { error: alertError } = await supabase.from('external_condition_alerts').insert({
@@ -216,8 +216,7 @@ export async function ingestNwsAlerts(
       severity: row.severity,
       certainty: row.certainty,
       urgency: row.urgency,
-      h3_resolution: H3_RESOLUTION,
-      h3_cell: h3Cell,
+      zone_id: zoneId,
       onset_ts: row.onsetTs,
       expires_ts: row.expiresTs,
       headline: row.headline,

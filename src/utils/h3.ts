@@ -12,7 +12,7 @@
  *   res 10 ≈ 0.28 km   — street-segment zones
  */
 
-import { latLngToCell, gridDisk, cellToLatLng, getResolution } from 'h3-js';
+import { latLngToCell, gridDisk, cellToLatLng, getResolution, polygonToCells } from 'h3-js';
 
 /** Default H3 resolution used for offer/trip zone tagging. */
 export const DEFAULT_RESOLUTION = 9;
@@ -56,4 +56,28 @@ export function getZoneCenter(zoneId: string): [number, number] {
  */
 export function getZoneResolution(zoneId: string): number {
   return getResolution(zoneId);
+}
+
+/**
+ * Convert a GeoJSON-style polygon to the set of H3 cells that cover it
+ * at the given resolution (polygon-to-cell tessellation / polyfill).
+ *
+ * Coordinate order follows the h3-js v4 convention: [lat, lng] pairs.
+ * The closing vertex of each ring is optional — h3-js closes it automatically.
+ *
+ * Usage example (GeoJSON feature with a known geometry):
+ *   const ring = feature.geometry.coordinates[0].map(([lng, lat]) => [lat, lng]);
+ *   const cells = polygonToZoneIds(ring);
+ *
+ * @param outerRing  Outer boundary as [lat, lng] pairs.
+ * @param holes      Optional interior hole rings, each as [lat, lng] pairs.
+ * @param resolution H3 resolution (0–15). Defaults to DEFAULT_RESOLUTION (9).
+ * @returns          Array of H3 index strings covering the polygon interior.
+ */
+export function polygonToZoneIds(
+  outerRing: [number, number][],
+  holes: [number, number][][] = [],
+  resolution = DEFAULT_RESOLUTION,
+): string[] {
+  return polygonToCells({ outer: outerRing, holes }, resolution);
 }

@@ -1,6 +1,8 @@
 # Custom Dictionary Words
 ASOS
 AWOS
+datagov
+datgov
 dedup
 doordash
 dropoff
@@ -14,6 +16,7 @@ Kaggle
 multilinestring
 multipolygon
 NHTSA
+NLCD
 NOAA
 rideshare
 usgs
