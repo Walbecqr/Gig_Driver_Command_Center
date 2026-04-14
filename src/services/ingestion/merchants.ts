@@ -19,8 +19,8 @@ import type { Json } from '@/types/supabase.generated';
 import {
   type ImportBatchInput,
   createImportBatch,
-  finaliseImportBatch,
   simpleHash,
+  submitImportBatchForReview,
 } from './ingestionUtils';
 import type { MerchantRow } from './merchantParser';
 
@@ -92,6 +92,6 @@ export async function ingestMerchants(
     if (!upsertError) parsedCount++;
   }
 
-  await finaliseImportBatch(importBatchId, rows.length, parsedCount);
+  await submitImportBatchForReview(importBatchId, rows.length, parsedCount);
   return importBatchId;
 }

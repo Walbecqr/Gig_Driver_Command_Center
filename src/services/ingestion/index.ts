@@ -19,8 +19,17 @@
 export { tokenizeCsv, buildColMap, getCell, parseDate, parseMoney } from './csvUtils';
 export type { ParseResult, ColMap, TokenizedCsv } from './csvUtils';
 
-export { createImportBatch, finaliseImportBatch, simpleHash } from './ingestionUtils';
+export {
+  createImportBatch,
+  finaliseImportBatch,
+  submitImportBatchForReview,
+  approveImportBatch,
+  linkTripToImportBatch,
+  simpleHash,
+} from './ingestionUtils';
 export type { ImportBatchInput } from './ingestionUtils';
+export { getImportBatchReview } from './importReview';
+export type { ImportBatchReviewResult, ImportBatchReviewSummary, ImportBatchReviewTrip } from './importReview';
 
 // ---------------------------------------------------------------------------
 // DoorDash (existing)

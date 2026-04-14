@@ -15,8 +15,8 @@ import type { Json } from '@/types/supabase.generated';
 import {
   type ImportBatchInput,
   createImportBatch,
-  finaliseImportBatch,
   simpleHash,
+  submitImportBatchForReview,
 } from './ingestionUtils';
 import type { WeatherConditionRow } from './weatherConditionsParser';
 
@@ -78,6 +78,6 @@ export async function ingestWeatherConditions(
     if (!insertError) parsedCount++;
   }
 
-  await finaliseImportBatch(importBatchId, rows.length, parsedCount);
+  await submitImportBatchForReview(importBatchId, rows.length, parsedCount);
   return importBatchId;
 }

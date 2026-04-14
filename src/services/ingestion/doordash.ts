@@ -141,6 +141,12 @@ export async function ingestDoorDashEarnings(
       .single();
 
     if (tripError || !trip) continue;
+    await linkTripToImportBatch({
+      tripId: trip.trip_id,
+      importBatchId,
+      sourceType: 'weekly_statement_csv',
+      rawRecordId: rawRecord.raw_record_id,
+    });
 
     // Financial record
     const { error: finError } = await supabase.from('trip_financials').insert({
@@ -177,7 +183,7 @@ export async function ingestDoorDashEarnings(
     parsedCount++;
   }
 
-  await finaliseImportBatch(importBatchId, rows.length, parsedCount);
+  await submitImportBatchForReview(importBatchId, rows.length, parsedCount);
   return importBatchId;
 }
 
@@ -249,6 +255,13 @@ export async function ingestDoorDashOrders(
       if (tripError || !newTrip) continue;
       tripId = newTrip.trip_id;
     }
+
+    await linkTripToImportBatch({
+      tripId,
+      importBatchId,
+      sourceType: 'manual_csv',
+      rawRecordId: rawRecord.raw_record_id,
+    });
 
     // Update metrics with duration if available
     if (row.durationMinutes != null) {
@@ -331,7 +344,7 @@ export async function ingestDoorDashOrders(
     parsedCount++;
   }
 
-  await finaliseImportBatch(importBatchId, rows.length, parsedCount);
+  await submitImportBatchForReview(importBatchId, rows.length, parsedCount);
   return importBatchId;
 }
 
@@ -367,17 +380,32 @@ async function createImportBatch(
   return data.import_batch_id;
 }
 
-async function finaliseImportBatch(
+async function submitImportBatchForReview(
   importBatchId: string,
   total: number,
   parsed: number,
 ): Promise<void> {
   const supabase = requireSupabase();
-  const status = parsed === 0 ? 'failed' : parsed < total ? 'partial' : 'completed';
+  const status = parsed === 0 ? 'failed' : 'review_pending';
   await supabase
     .from('import_batches')
-    .update({ import_status: status, row_count_parsed: parsed })
+    .update({ import_status: status, row_count_raw: total, row_count_parsed: parsed })
     .eq('import_batch_id', importBatchId);
+}
+
+async function linkTripToImportBatch(params: {
+  tripId: string;
+  importBatchId: string;
+  sourceType: SourceTypeEnum;
+  rawRecordId?: string;
+}): Promise<void> {
+  const supabase = requireSupabase();
+  await supabase.from('trip_source_links').insert({
+    trip_id: params.tripId,
+    import_batch_id: params.importBatchId,
+    raw_record_id: params.rawRecordId ?? null,
+    source_type: params.sourceType,
+  });
 }
 
 /** Cheap non-cryptographic hash for dedup row_hash column. */
