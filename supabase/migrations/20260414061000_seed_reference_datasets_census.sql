@@ -185,8 +185,8 @@ values
   'Deferred dataset. Use as confidence modifier, not primary score driver. Target table: zone_demographics.'
 ),
 (
-  'tiger',
-  'reference_boundary',
+  'geojson_file',
+  'reference',
   'TIGER/Line Census Tracts',
   'tiger_line_census_tracts',
   'https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html',
@@ -199,8 +199,8 @@ values
   'Primary geometry source for tract-level ACS interpolation. Target tables: reference_features and zone_reference_layers.'
 ),
 (
-  'tiger',
-  'reference_boundary',
+  'geojson_file',
+  'reference',
   'TIGER/Line Block Groups',
   'tiger_line_block_groups',
   'https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html',
@@ -213,8 +213,8 @@ values
   'Recommended for finer residential scoring. Target tables: reference_features and zone_reference_layers.'
 ),
 (
-  'tiger',
-  'reference_boundary',
+  'geojson_file',
+  'reference',
   'TIGER/Line Counties',
   'tiger_line_counties',
   'https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html',
@@ -227,8 +227,8 @@ values
   'Useful for market-level and coarse res6 mapping. Target tables: reference_features and zone_reference_layers.'
 ),
 (
-  'tiger',
-  'reference_boundary',
+  'geojson_file',
+  'reference',
   'TIGER/Line Places',
   'tiger_line_places',
   'https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html',
