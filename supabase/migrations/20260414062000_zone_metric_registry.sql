@@ -58,3 +58,26 @@ DROP TRIGGER IF EXISTS trg_zone_metric_registry_set_updated_at
 CREATE TRIGGER trg_zone_metric_registry_set_updated_at
   BEFORE UPDATE ON public.zone_metric_registry
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- ── Schema evolution ────────────────────────────────────────────────────────
+-- The table may already exist from 20260414060001_reference_overlay_tables.sql
+-- with a narrower schema (metric_key, display_name, layer_category, source_type,
+-- is_active, created_at, updated_at). Add missing columns idempotently so the
+-- seed migration can upsert against the full catalog schema.
+
+ALTER TABLE public.zone_metric_registry
+  ADD COLUMN IF NOT EXISTS metric_label            text,
+  ADD COLUMN IF NOT EXISTS metric_category         text,
+  ADD COLUMN IF NOT EXISTS metric_family           text,
+  ADD COLUMN IF NOT EXISTS value_type              text,
+  ADD COLUMN IF NOT EXISTS source_scope            text,
+  ADD COLUMN IF NOT EXISTS default_h3_resolution   integer,
+  ADD COLUMN IF NOT EXISTS preferred_boundary_type text,
+  ADD COLUMN IF NOT EXISTS is_derived              boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS source_priority         integer NOT NULL DEFAULT 100;
+
+-- Backfill metric_label from the legacy display_name column for rows that
+-- were inserted by the old seed so ON CONFLICT DO UPDATE can overwrite them.
+UPDATE public.zone_metric_registry
+  SET metric_label = display_name
+  WHERE metric_label IS NULL AND display_name IS NOT NULL;

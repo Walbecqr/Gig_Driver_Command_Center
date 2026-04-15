@@ -2,6 +2,25 @@
 -- Migration: Seed zone metric registry with Census + derived keys
 -- ============================================================
 
+-- Ensure the full catalog schema columns exist before seeding.
+-- zone_metric_registry may have been created by an earlier migration with a
+-- narrower schema (metric_key, display_name, layer_category, source_type).
+ALTER TABLE public.zone_metric_registry
+  ADD COLUMN IF NOT EXISTS metric_label            text,
+  ADD COLUMN IF NOT EXISTS metric_category         text,
+  ADD COLUMN IF NOT EXISTS metric_family           text,
+  ADD COLUMN IF NOT EXISTS value_type              text,
+  ADD COLUMN IF NOT EXISTS source_scope            text,
+  ADD COLUMN IF NOT EXISTS default_h3_resolution   integer,
+  ADD COLUMN IF NOT EXISTS preferred_boundary_type text,
+  ADD COLUMN IF NOT EXISTS is_derived              boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS source_priority         integer NOT NULL DEFAULT 100;
+
+-- Backfill metric_label from legacy display_name for any pre-existing rows.
+UPDATE public.zone_metric_registry
+  SET metric_label = display_name
+  WHERE metric_label IS NULL AND display_name IS NOT NULL;
+
 INSERT INTO public.zone_metric_registry (
   metric_key,
   metric_label,

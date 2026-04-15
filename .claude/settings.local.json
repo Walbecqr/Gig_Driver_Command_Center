@@ -35,7 +35,15 @@
       "Bash(supabase status:*)",
       "Bash(supabase db:*)",
       "Bash(grep -n \"^      [a-z_]*: {$\" /c/Users/Walbe/Gig_Driver_Command_Center/src/types/supabase.generated.ts)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(mv 20260412000100_seed_reference_datasets_census.sql 20260414061000_seed_reference_datasets_census.sql)",
+      "Bash(mv 20260412000200_zone_metric_registry.sql 20260414062000_zone_metric_registry.sql)",
+      "Bash(mv 20260412000201_seed_zone_metric_registry.sql 20260414062001_seed_zone_metric_registry.sql)",
+      "Bash(mv 20260412000202_zone_demographics_metric_key_fk.sql 20260414062002_zone_demographics_metric_key_fk.sql)",
+      "Bash(ls -1 *.sql)",
+      "Bash(rm 20260414062000b_zone_metric_registry_alter.sql)",
+      "Bash(mv 20260414062002_zone_demographics_metric_key_fk.sql 20260414062003_zone_demographics_metric_key_fk.sql)",
+      "Bash(mv 20260414062001_seed_zone_metric_registry.sql 20260414062002_seed_zone_metric_registry.sql)"
     ],
     "additionalDirectories": [
       "C:\\Users\\Walbe\\.claude\\projects\\c--Users-Walbe-Gig-Driver-Command-Center"
