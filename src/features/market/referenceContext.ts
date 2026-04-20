@@ -61,10 +61,10 @@ export async function getReferenceContextSummary(
     ] = await Promise.all([
       supabaseClient
         .from('external_conditions')
-        .select('recorded_at, weather_condition, temperature_f, wind_speed_mph')
+        .select('zone_id, recorded_at, weather_condition, temperature_f, wind_speed_mph')
         .in('zone_id', cleanZoneIds)
-        .order('recorded_at', { ascending: false })
-        .limit(1),
+        .order('zone_id')
+        .order('recorded_at', { ascending: false }),
       supabaseClient
         .from('external_condition_alerts')
         .select('external_condition_alert_id', { count: 'exact', head: true })
@@ -109,7 +109,16 @@ export async function getReferenceContextSummary(
       );
     }
 
-    const weatherRow = latestWeather.data?.[0];
+    // Deduplicate: keep the most-recent row per zone_id, then take the newest overall.
+    const seenZones = new Set<string>();
+    const deduplicatedWeather = (latestWeather.data ?? []).filter((row) => {
+      if (seenZones.has(row.zone_id)) return false;
+      seenZones.add(row.zone_id);
+      return true;
+    });
+    const weatherRow = deduplicatedWeather.sort(
+      (a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime(),
+    )[0];
 
     const ratings = (merchantRows.data ?? [])
       .map((row) => row.rating)

@@ -46,14 +46,24 @@ export async function getImportBatchReview(importBatchId: string): Promise<Impor
     throw new Error(`Failed to load import batch review summary: ${batchError?.message}`);
   }
 
-  const { data: rawRows } = await supabase
-    .from('raw_import_records')
-    .select('parse_status')
-    .eq('import_batch_id', importBatchId);
+  const parseStatuses = ['parsed', 'warning', 'failed', 'skipped'] as const satisfies readonly Database['public']['Enums']['parse_status_enum'][];
+
+  const parseStatusCountResults = await Promise.all(
+    parseStatuses.map((status) =>
+      supabase
+        .from('raw_import_records')
+        .select('*', { count: 'exact', head: true })
+        .eq('import_batch_id', importBatchId)
+        .eq('parse_status', status),
+    ),
+  );
 
   const parseStatusCounts: ImportBatchReviewSummary['parseStatusCounts'] = {};
-  for (const row of rawRows ?? []) {
-    parseStatusCounts[row.parse_status] = (parseStatusCounts[row.parse_status] ?? 0) + 1;
+  for (let i = 0; i < parseStatuses.length; i++) {
+    const count = parseStatusCountResults[i].count;
+    if (count !== null && count > 0) {
+      parseStatusCounts[parseStatuses[i]] = count;
+    }
   }
 
   const { count: reconciliationIssueCount } = await supabase
