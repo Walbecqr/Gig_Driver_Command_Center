@@ -35,6 +35,16 @@ export interface MarketSummary {
   totalZones: number;
 }
 
+interface ZoneAggregateRow {
+  zone_id: string;
+  total_offers: number | string | null;
+  total_accepted: number | string | null;
+  total_trips: number | string | null;
+  total_gross: number | string | null;
+  avg_wait: number | string | null;
+  window_start?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -48,15 +58,7 @@ export interface MarketSummary {
 export async function getMarketSummary(hoursBack = 168, topN = 5): Promise<MarketSummary> {
   const cutoff = new Date(Date.now() - hoursBack * 60 * 60_000).toISOString();
 
-  const rows = await querySql<{
-    zone_id: string;
-    total_offers: number;
-    total_accepted: number;
-    total_trips: number;
-    total_gross: number;
-    avg_wait: number | null;
-    window_start: string;
-  }>(
+  const rows = await querySql<ZoneAggregateRow>(
     `SELECT
        zone_id,
        SUM(offers_seen_count)      AS total_offers,
@@ -76,17 +78,25 @@ export async function getMarketSummary(hoursBack = 168, topN = 5): Promise<Marke
     return { topEarning: [], highAcceptance: [], fastPickup: [], windowStart: null, totalZones: 0 };
   }
 
-  const insights: ZoneInsight[] = rows.map((r) => ({
-    zoneId: r.zone_id,
-    totalOffers: r.total_offers,
-    totalTrips: r.total_trips,
-    totalGross: r.total_gross,
-    avgEarningsPerTrip:
-      r.total_trips > 0 ? Math.round((r.total_gross / r.total_trips) * 100) / 100 : null,
-    acceptanceRate:
-      r.total_offers > 0 ? Math.round((r.total_accepted / r.total_offers) * 100) : null,
-    avgWaitMinutes: r.avg_wait != null ? Math.round(r.avg_wait * 10) / 10 : null,
-  }));
+  const insights: ZoneInsight[] = rows.map((r) => {
+    const totalOffers = toFiniteNumber(r.total_offers) ?? 0;
+    const totalAccepted = toFiniteNumber(r.total_accepted) ?? 0;
+    const totalTrips = toFiniteNumber(r.total_trips) ?? 0;
+    const totalGross = toFiniteNumber(r.total_gross) ?? 0;
+    const avgWait = toFiniteNumber(r.avg_wait);
+
+    return {
+      zoneId: r.zone_id,
+      totalOffers,
+      totalTrips,
+      totalGross,
+      avgEarningsPerTrip:
+        totalTrips > 0 ? Math.round((totalGross / totalTrips) * 100) / 100 : null,
+      acceptanceRate:
+        totalOffers > 0 ? Math.round((totalAccepted / totalOffers) * 100) : null,
+      avgWaitMinutes: avgWait != null ? Math.round(avgWait * 10) / 10 : null,
+    };
+  });
 
   return {
     windowStart: rows[0]?.window_start ?? null,
@@ -118,14 +128,7 @@ export async function getNearbyZoneInsights(
   const cutoff = new Date(Date.now() - hoursBack * 60 * 60_000).toISOString();
   const placeholders = nearby.map(() => '?').join(', ');
 
-  const rows = await querySql<{
-    zone_id: string;
-    total_offers: number;
-    total_accepted: number;
-    total_trips: number;
-    total_gross: number;
-    avg_wait: number | null;
-  }>(
+  const rows = await querySql<ZoneAggregateRow>(
     `SELECT
        zone_id,
        SUM(offers_seen_count)      AS total_offers,
@@ -140,17 +143,34 @@ export async function getNearbyZoneInsights(
     [...nearby, cutoff],
   );
 
-  return rows.map((r) => ({
-    zoneId: r.zone_id,
-    totalOffers: r.total_offers,
-    totalTrips: r.total_trips,
-    totalGross: r.total_gross,
-    avgEarningsPerTrip:
-      r.total_trips > 0 ? Math.round((r.total_gross / r.total_trips) * 100) / 100 : null,
-    acceptanceRate:
-      r.total_offers > 0 ? Math.round((r.total_accepted / r.total_offers) * 100) : null,
-    avgWaitMinutes: r.avg_wait != null ? Math.round(r.avg_wait * 10) / 10 : null,
-  }));
+  return rows.map((r) => {
+    const totalOffers = toFiniteNumber(r.total_offers) ?? 0;
+    const totalAccepted = toFiniteNumber(r.total_accepted) ?? 0;
+    const totalTrips = toFiniteNumber(r.total_trips) ?? 0;
+    const totalGross = toFiniteNumber(r.total_gross) ?? 0;
+    const avgWait = toFiniteNumber(r.avg_wait);
+
+    return {
+      zoneId: r.zone_id,
+      totalOffers,
+      totalTrips,
+      totalGross,
+      avgEarningsPerTrip:
+        totalTrips > 0 ? Math.round((totalGross / totalTrips) * 100) / 100 : null,
+      acceptanceRate:
+        totalOffers > 0 ? Math.round((totalAccepted / totalOffers) * 100) : null,
+      avgWaitMinutes: avgWait != null ? Math.round(avgWait * 10) / 10 : null,
+    };
+  });
+}
+
+function toFiniteNumber(value: number | string | null | undefined): number | null {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
 }
 
 export * from './referenceContext';
