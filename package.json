@@ -14,7 +14,18 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:push": "supabase db push",
+    "db:migrate:new": "supabase migration new",
+    "db:migrate:up": "supabase migration up",
+    "db:types:local": "supabase gen types typescript --local > src/types/supabase.generated.ts",
+    "db:types:linked": "supabase gen types typescript --linked > src/types/supabase.generated.ts",
+    "db:audit:rls": "supabase db execute --file scripts/audit_rls.sql",
+    "db:audit:index": "supabase db execute --file scripts/audit_fk_indexes.sql",
+    "db:audit:security": "bash scripts/audit_service_role.sh"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.21.0",

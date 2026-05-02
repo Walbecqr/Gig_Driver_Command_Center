@@ -40,7 +40,7 @@ export async function getImportBatchReview(importBatchId: string): Promise<Impor
     .from('import_batches')
     .select('import_batch_id, import_status, row_count_raw, row_count_parsed')
     .eq('import_batch_id', importBatchId)
-    .single();
+    .maybeSingle();
 
   if (batchError || !batch) {
     throw new Error(`Failed to load import batch review summary: ${batchError?.message}`);

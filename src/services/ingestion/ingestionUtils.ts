@@ -113,7 +113,7 @@ export async function approveImportBatch(importBatchId: string): Promise<void> {
     .from('import_batches')
     .select('row_count_raw, row_count_parsed')
     .eq('import_batch_id', importBatchId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) throw new Error(`Failed to load import batch for approval: ${error?.message}`);
   await finaliseImportBatch(importBatchId, data.row_count_raw ?? 0, data.row_count_parsed ?? 0);
