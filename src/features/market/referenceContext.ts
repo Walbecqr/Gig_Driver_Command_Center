@@ -112,7 +112,7 @@ export async function getReferenceContextSummary(
     // Deduplicate: keep the most-recent row per zone_id, then take the newest overall.
     const seenZones = new Set<string>();
     const deduplicatedWeather = (latestWeather.data ?? []).filter((row) => {
-      if (seenZones.has(row.zone_id)) return false;
+      if (!row.zone_id || seenZones.has(row.zone_id)) return false;
       seenZones.add(row.zone_id);
       return true;
     });

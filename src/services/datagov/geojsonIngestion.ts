@@ -36,13 +36,13 @@ import {
 import type { ParsedGeoJsonFeature } from './geojsonParser';
 
 const H3_RESOLUTION = 9;
-const POLYGON_AWARE_TABLES = new Set([
+const POLYGON_AWARE_TABLES: Set<string> = new Set([
   'zone_risk_layers',
   'zone_transport_layers',
   'zone_reference_layers',
   'zone_demand_drivers',
   'zone_land_use_layers',
-] as const);
+]);
 
 // ----------------------------------------------------------------
 // Main ingestion entry point
