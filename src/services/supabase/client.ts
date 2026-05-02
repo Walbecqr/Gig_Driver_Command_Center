@@ -26,3 +26,14 @@ export const supabaseClient = isSupabaseConfigured
       },
     })
   : null;
+
+/**
+ * Supabase client scoped to the `reference` schema.
+ *
+ * Use for all queries against the 15 reference/overlay tables that were moved
+ * from `public` to `reference` in migration 20260421000000_reference_schema.
+ *
+ * Requires the `reference` schema to be added to PostgREST's exposed schemas
+ * list in the Supabase Dashboard (Settings → API → Exposed schemas).
+ */
+export const referenceClient = supabaseClient?.schema('reference') ?? null;

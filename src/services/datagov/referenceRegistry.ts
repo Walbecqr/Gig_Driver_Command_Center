@@ -11,7 +11,7 @@
  * downstream ingestion services need for FK columns.
  */
 
-import { supabaseClient as supabase } from '@/services/supabase/client';
+import { referenceClient as supabase } from '@/services/supabase/client';
 import type { Database } from '@/types/supabase.generated';
 
 type ReferenceSourceTypeEnum  = Database['public']['Enums']['reference_source_type_enum'];

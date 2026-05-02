@@ -226,7 +226,12 @@ export const DeliveryPlatformAccountSchema = z.object({
 
 export type DeliveryPlatformAccount = z.infer<typeof DeliveryPlatformAccountSchema>;
 
-// ── public.external_conditions ────────────────────────────────────────────────
+// ── reference schema ─────────────────────────────────────────────────────────
+// Tables below live in the `reference` schema after migration
+// 20260421000000_reference_schema. Use referenceClient (not supabaseClient)
+// when querying them.
+
+// ── reference.external_conditions ────────────────────────────────────────────
 
 export const ExternalConditionSchema = z.object({
   external_condition_id: uuid,
@@ -245,7 +250,7 @@ export const ExternalConditionSchema = z.object({
 
 export type ExternalCondition = z.infer<typeof ExternalConditionSchema>;
 
-// ── public.merchant_locations ─────────────────────────────────────────────────
+// ── reference.merchant_locations ─────────────────────────────────────────────
 
 export const MerchantLocationSchema = z.object({
   merchant_location_id: uuid,

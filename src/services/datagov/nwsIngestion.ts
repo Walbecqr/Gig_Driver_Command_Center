@@ -11,7 +11,7 @@
  * H3 resolution 9 is used for point geometries (≈ 0.73 km cells).
  */
 
-import { getSupabaseClientOrThrow } from '@/services/supabase/utils';
+import { getSupabaseReferenceClientOrThrow } from '@/services/supabase/utils';
 import { getZoneId } from '@/utils/h3';
 import type { Json } from '@/types/supabase.generated';
 import {
@@ -63,7 +63,7 @@ export async function ingestNwsObservations(
   rows: NwsObservationRow[],
   datasetParams?: Partial<ReferenceDatasetParams>,
 ): Promise<string> {
-  const supabase = getSupabaseClientOrThrow('[nwsIngestion] Supabase client is not configured');
+  const supabase = getSupabaseReferenceClientOrThrow('[nwsIngestion] Supabase client is not configured');
   const params = { ...DEFAULT_OBSERVATIONS_DATASET, ...datasetParams };
   const referenceDatasetId = await ensureReferenceDataset(params);
   const batchId = await createReferenceIngestBatch({
@@ -156,7 +156,7 @@ export async function ingestNwsAlerts(
   rows: NwsAlertRow[],
   datasetParams?: Partial<ReferenceDatasetParams>,
 ): Promise<string> {
-  const supabase = getSupabaseClientOrThrow('[nwsIngestion] Supabase client is not configured');
+  const supabase = getSupabaseReferenceClientOrThrow('[nwsIngestion] Supabase client is not configured');
   const params = { ...DEFAULT_ALERTS_DATASET, ...datasetParams };
   const referenceDatasetId = await ensureReferenceDataset(params);
   const batchId = await createReferenceIngestBatch({

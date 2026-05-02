@@ -9,7 +9,7 @@
  * 'unknown' since the dataset spans both Uber and Lyft.
  */
 
-import { supabaseClient as supabase } from '@/services/supabase/client';
+import { supabaseClient as supabase, referenceClient } from '@/services/supabase/client';
 import { getZoneId } from '@/utils/h3';
 import type { Json } from '@/types/supabase.generated';
 import {
@@ -58,7 +58,7 @@ export async function ingestWeatherConditions(
         ? getZoneId(row.latitude, row.longitude)
         : null;
 
-    const { error: insertError } = await supabase
+    const { error: insertError } = await referenceClient!
       .from('external_conditions')
       .insert({
         recorded_at: row.recordedAt,

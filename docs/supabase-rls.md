@@ -11,7 +11,8 @@ The database uses three schemas with distinct access control strategies:
 
 | Schema      | RLS Enabled | Access Model |
 |-------------|-------------|--------------|
-| `public`    | Yes         | Mix of `auth.uid()` (user-owned) and `auth.role() = 'authenticated'` (shared reference data) |
+| `public`    | Yes         | `auth.uid()` (user-owned tables only) |
+| `reference` | Yes (inherited) | Schema-level grants to `authenticated`; per-table `auth.role()` policies as defence-in-depth |
 | `core`      | No          | Service-role only — intentionally no RLS (see Section 4) |
 | `analytics` | Partial     | `zone_time_series`: authenticated SELECT; snapshot tables: service-role only |
 
@@ -88,39 +89,61 @@ CREATE POLICY "owner_raw_import_records"
 
 ---
 
-## Section 2: public schema — Shared Reference Tables
+## Section 2: reference schema — Shared Reference Tables
 
-These tables contain shared, read-mostly data (zone overlays, demographics, weather alerts). Any authenticated user can read and write; deletions require service-role.
+These tables were moved from `public` to the `reference` schema in migration
+`20260421000000_reference_schema`. They contain shared, read-mostly data
+(zone overlays, demographics, weather alerts, POI). Any authenticated user can
+read and write; deletions require service-role.
 
-### Policy pattern
+> **PostgREST configuration required:** After applying migration
+> `20260421000000_reference_schema`, add `reference` to the exposed schemas
+> list in the Supabase Dashboard (Settings → API → Exposed schemas). Without
+> this, all `.schema('reference')` JS client calls return 404.
+
+### Access control
+
+Access is now granted at the schema level instead of per-table RLS:
 
 ```sql
--- SELECT / INSERT / UPDATE: any authenticated user
-USING (auth.role() = 'authenticated')
-WITH CHECK (auth.role() = 'authenticated')
-
--- DELETE: not granted to authenticated role (service-role only)
+GRANT USAGE ON SCHEMA reference TO anon, authenticated, service_role;
+GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA reference TO authenticated;
+GRANT ALL ON ALL TABLES IN SCHEMA reference TO service_role;
 ```
 
-### Tables using this pattern
+The original per-table `auth.role() = 'authenticated'` RLS policies were
+preserved automatically when `ALTER TABLE SET SCHEMA` moved the tables; they
+remain as a defence-in-depth layer.
 
-| Table | Migration |
-|-------|-----------|
-| `public.reference_datasets` | `20260414060000_reference_backbone.sql` |
-| `public.reference_ingest_batches` | `20260414060000_reference_backbone.sql` |
-| `public.reference_features` | `20260414060000_reference_backbone.sql` |
-| `public.external_condition_alerts` | `20260414060000_reference_backbone.sql` |
-| `public.zone_risk_layers` | `20260414060001_reference_overlay_tables.sql` |
-| `public.zone_transport_layers` | `20260414060001_reference_overlay_tables.sql` |
-| `public.zone_reference_layers` | `20260414060001_reference_overlay_tables.sql` |
-| `public.zone_demand_drivers` | `20260414060001_reference_overlay_tables.sql` |
-| `public.poi_reference` | `20260414060001_reference_overlay_tables.sql` |
-| `public.zone_land_use_layers` | `20260414060001_reference_overlay_tables.sql` |
-| `public.infrastructure_reference` | `20260414060001_reference_overlay_tables.sql` |
-| `public.zone_demographics` | `20260414060001_reference_overlay_tables.sql` |
-| `public.zone_metric_registry` | `20260414060001_reference_overlay_tables.sql` |
-| `public.merchant_locations` | `20260329000002_kaggle_datasets.sql` (recreated in `20260414050534`) |
-| `public.external_conditions` | `20260329000002_kaggle_datasets.sql` (recreated in `20260414050534`) |
+### JS client
+
+Use `referenceClient` (not `supabaseClient`) for all queries against these tables:
+
+```typescript
+import { referenceClient } from '@/services/supabase/client';
+// or
+import { getSupabaseReferenceClientOrThrow } from '@/services/supabase/utils';
+```
+
+### Tables in reference schema
+
+| Table | Originally created in |
+|-------|----------------------|
+| `reference.reference_datasets` | `20260414060000_reference_backbone.sql` |
+| `reference.reference_ingest_batches` | `20260414060000_reference_backbone.sql` |
+| `reference.reference_features` | `20260414060000_reference_backbone.sql` |
+| `reference.external_condition_alerts` | `20260414060000_reference_backbone.sql` |
+| `reference.zone_risk_layers` | `20260414060001_reference_overlay_tables.sql` |
+| `reference.zone_transport_layers` | `20260414060001_reference_overlay_tables.sql` |
+| `reference.zone_reference_layers` | `20260414060001_reference_overlay_tables.sql` |
+| `reference.zone_demand_drivers` | `20260414060001_reference_overlay_tables.sql` |
+| `reference.poi_reference` | `20260414060001_reference_overlay_tables.sql` |
+| `reference.zone_land_use_layers` | `20260414060001_reference_overlay_tables.sql` |
+| `reference.infrastructure_reference` | `20260414060001_reference_overlay_tables.sql` |
+| `reference.zone_demographics` | `20260414060001_reference_overlay_tables.sql` |
+| `reference.zone_metric_registry` | `20260414060001_reference_overlay_tables.sql` |
+| `reference.merchant_locations` | `20260329000002_kaggle_datasets.sql` (recreated in `20260414050534`) |
+| `reference.external_conditions` | `20260329000002_kaggle_datasets.sql` (recreated in `20260414050534`) |
 
 ---
 

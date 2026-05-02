@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { isSupabaseConfigured, supabaseClient } from '@/services/supabase/client';
+import { isSupabaseConfigured, referenceClient, supabaseClient } from '@/services/supabase/client';
 import type { Database } from '@/types/supabase.generated';
 
 /**
@@ -17,4 +17,20 @@ export function getSupabaseClientOrThrow(
     throw new Error(errorMessage);
   }
   return supabaseClient;
+}
+
+/**
+ * Get the Supabase client scoped to the `reference` schema, throwing if unavailable.
+ *
+ * Use for all queries against reference/overlay tables
+ * (reference_datasets, reference_features, zone_demographics, external_conditions, etc.)
+ * that live in the `reference` schema after migration 20260421000000_reference_schema.
+ */
+export function getSupabaseReferenceClientOrThrow(
+  errorMessage = 'Supabase reference client is not configured',
+): NonNullable<typeof referenceClient> {
+  if (!isSupabaseConfigured || !referenceClient) {
+    throw new Error(errorMessage);
+  }
+  return referenceClient;
 }

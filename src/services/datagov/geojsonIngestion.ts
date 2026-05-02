@@ -24,7 +24,7 @@
  *   - When no polygon tessellation or centroid exists, zone_id is stored as ''.
  */
 
-import { getSupabaseClientOrThrow } from '../supabase/utils';
+import { getSupabaseReferenceClientOrThrow } from '../supabase/utils';
 import { getZoneId } from '@/utils/h3';
 import type { Json } from '@/types/supabase.generated';
 import {
@@ -62,7 +62,7 @@ export async function ingestGeoJsonFeatures(
   features: ParsedGeoJsonFeature[],
   datasetParams: ReferenceDatasetParams,
 ): Promise<string> {
-  const supabase = getSupabaseClientOrThrow('[geojsonIngestion] Supabase client is not configured');
+  const supabase = getSupabaseReferenceClientOrThrow('[geojsonIngestion] Supabase client is not configured');
   const referenceDatasetId = await ensureReferenceDataset(datasetParams);
   const batchId = await createReferenceIngestBatch({
     referenceDatasetId,
@@ -157,7 +157,7 @@ async function insertDomainRow(
   referenceFeatureId: string,
   referenceDatasetId: string,
   zoneId: string,
-  supabase: ReturnType<typeof getSupabaseClientOrThrow>,
+  supabase: ReturnType<typeof getSupabaseReferenceClientOrThrow>,
 ): Promise<boolean> {
   const profile = feat.profile;
 

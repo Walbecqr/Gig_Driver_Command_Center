@@ -13,7 +13,7 @@
  * zone-scoring queries can group by zone_id without a second pass.
  */
 
-import { supabaseClient as supabase } from '@/services/supabase/client';
+import { supabaseClient as supabase, referenceClient } from '@/services/supabase/client';
 import { getZoneId } from '@/utils/h3';
 import type { Json } from '@/types/supabase.generated';
 import {
@@ -65,7 +65,7 @@ export async function ingestMerchants(
         : null;
 
     // Upsert: conflict on (platform, name, latitude, longitude) → skip duplicate
-    const { error: upsertError } = await supabase
+    const { error: upsertError } = await referenceClient!
       .from('merchant_locations')
       .upsert(
         {

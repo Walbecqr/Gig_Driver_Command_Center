@@ -14,7 +14,7 @@
  * on zone_demographics carry the GEOID for manual H3 tessellation later.
  */
 
-import { supabaseClient as supabase } from '@/services/supabase/client';
+import { referenceClient as supabase } from '@/services/supabase/client';
 import { assertKnownZoneMetricKey, getZoneMetricDefinition } from '@/lib/zone-metrics/registry';
 import { getZoneId } from '@/utils/h3';
 import type { Json } from '@/types/supabase.generated';

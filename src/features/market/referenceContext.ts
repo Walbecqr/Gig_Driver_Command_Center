@@ -1,5 +1,5 @@
 import { captureException } from '@/services/crash';
-import { isSupabaseConfigured, supabaseClient } from '@/services/supabase/client';
+import { isSupabaseConfigured, referenceClient } from '@/services/supabase/client';
 
 export interface WeatherContextSummary {
   observedAt: string;
@@ -44,7 +44,7 @@ export async function getReferenceContextSummary(
   const cleanZoneIds = Array.from(new Set(zoneIds.filter(Boolean)));
   if (cleanZoneIds.length === 0) return EMPTY_SUMMARY;
 
-  if (!isSupabaseConfigured || !supabaseClient) {
+  if (!isSupabaseConfigured || !referenceClient) {
     return EMPTY_SUMMARY;
   }
 
@@ -59,32 +59,32 @@ export async function getReferenceContextSummary(
       boundaryRows,
       demandRows,
     ] = await Promise.all([
-      supabaseClient
+      referenceClient
         .from('external_conditions')
         .select('zone_id, recorded_at, weather_condition, temperature_f, wind_speed_mph')
         .in('zone_id', cleanZoneIds)
         .order('zone_id')
         .order('recorded_at', { ascending: false }),
-      supabaseClient
+      referenceClient
         .from('external_condition_alerts')
         .select('external_condition_alert_id', { count: 'exact', head: true })
         .in('zone_id', cleanZoneIds)
         .or(`expires_ts.is.null,expires_ts.gt.${nowIso}`),
-      supabaseClient
+      referenceClient
         .from('merchant_locations')
         .select('zone_id, platform, rating')
         .in('zone_id', cleanZoneIds)
         .limit(500),
-      supabaseClient
+      referenceClient
         .from('merchant_locations')
         .select('merchant_id', { count: 'exact', head: true })
         .in('zone_id', cleanZoneIds),
-      supabaseClient
+      referenceClient
         .from('zone_reference_layers')
         .select('boundary_type')
         .in('zone_id', cleanZoneIds)
         .limit(500),
-      supabaseClient
+      referenceClient
         .from('zone_demand_drivers')
         .select('driver_type')
         .in('zone_id', cleanZoneIds)
