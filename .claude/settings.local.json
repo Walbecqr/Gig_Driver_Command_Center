@@ -44,7 +44,11 @@
       "Bash(rm 20260414062000b_zone_metric_registry_alter.sql)",
       "Bash(mv 20260414062002_zone_demographics_metric_key_fk.sql 20260414062003_zone_demographics_metric_key_fk.sql)",
       "Bash(mv 20260414062001_seed_zone_metric_registry.sql 20260414062002_seed_zone_metric_registry.sql)",
-      "PowerShell(Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser)"
+      "PowerShell(Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser)",
+      "PowerShell(git config --global user.name \"Rebecca Walbecq\")",
+      "PowerShell(git config --global user.email \"131634554+Walbecqr@users.noreply.github.com\")",
+      "PowerShell(git config --global user.name)",
+      "PowerShell(git config --global user.email)"
     ],
     "additionalDirectories": [
       "C:\\Users\\Walbe\\.claude\\projects\\c--Users-Walbe-Gig-Driver-Command-Center"
